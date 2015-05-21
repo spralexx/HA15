@@ -1,0 +1,20 @@
+Header ist ein png "header.png" im img ordner. diese datei stammt aus dem PDF mit der Aufgabenstellung
+
+Innerhalb des Body gibt es 3 Sections.
+
+Eines für das menü auf der linken (auswahl für mahlwerkzeuge). Dieses Menü ist auf der linken seite angesiedelt,
+da es wahrscheinlich am häufigsten benutzt wird und dort direkt ins auge sticht und schnell zu überblicken ist.
+
+Eine Section für die eigentliche Zeichenfläche. Diese ist mittig angeordnet, da Sich die Interaktion hier abspielen
+wird und daher direkt im blcikfeld liegen sollte.
+
+Eine für das rechte Menü, in dem die optionen zum Abspeichern des Bildes untergebracht sind und die eigenen Mahlwerkzeuge.
+
+Die Stiftgrafiken im linken menü sind von http://www.flaticon.com/free-icon/writing-pencil-symbol_23930 kopiert.
+
+Das Javascript und css ist zwecks übersichtlichkeit in eine zusätzliche datei ausgelagert, welche im head der html datei importiert wird.
+
+Die Paintfunktionalität wurde von http://cssdeck.com/labs/qwtakpii/ kopiert.
+
+Die tabelle für den color picer wird mittels javascript (DOM) angelegt (PrepareColorChooser) der constructor übernimmt
+einen wert (zahl) welcher die anzahl der zeilen udn spalten angibt.
