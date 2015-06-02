@@ -1,4 +1,7 @@
 (function(){
+
+	var choosenColor='';
+
 function prepareDrawPane() {
 	var canvas = document.querySelector('#paint');
 	var ctx = canvas.getContext('2d');
@@ -34,11 +37,13 @@ function prepareDrawPane() {
 	}, false);
 
 	var onPaint = function() {
+			ctx.strokeStyle=choosenColor;
 			ctx.lineTo(mouse.x, mouse.y);
 			ctx.stroke();
 	};
 
 }
+
 
 function PrepareColorChooser(counter){
 
@@ -54,6 +59,7 @@ function PrepareColorChooser(counter){
       this.td.setAttribute("id","td"+i+"_"+x);
 			this.td.setAttribute("style","background-color: "+getNextColor()+";"); //set color from color set
 			this.space=document.createElement("br");
+		this.td.addEventListener("click",function(e){choosenColor=e.toElement.style.backgroundColor});
 			this.td.appendChild(this.space);
       this.tr.appendChild(this.td);
     }
