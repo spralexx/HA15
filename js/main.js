@@ -59,7 +59,17 @@ function PrepareColorChooser(counter){
       this.td.setAttribute("id","td"+i+"_"+x);
 			this.td.setAttribute("style","background-color: "+getNextColor()+";"); //set color from color set
 			this.space=document.createElement("br");
-		this.td.addEventListener("click",function(e){choosenColor=e.toElement.style.backgroundColor});
+			this.td.addEventListener("click",function(e){choosenColor=e.toElement.style.backgroundColor;
+																											console.log(document.getElementById("toolsAndColors"));
+																											var table=document.getElementById("toolsAndColors");
+																											var tdsInTable=table.getElementsByTagName("td");
+
+																											for(var element=3;element<(counter*counter)+3;element++){
+																												console.log(element);
+																												tdsInTable[element].setAttribute("class","notClicked");
+																											}
+																											e.toElement.setAttribute("class","clicked");
+																										});
 			this.td.appendChild(this.space);
       this.tr.appendChild(this.td);
     }
@@ -73,7 +83,7 @@ function PrepareColorChooser(counter){
 	function returnColorArray(size){
 		var array=[];
 		for(var i=0;i<(size*size);i++){
-				array[i]="rgb("+Math.round(Math.random()*255)+","+Math.round(Math.random()*255)+","+Math.round(Math.random()*255)+")";
+				array[i]="rgb("+Math.round(Math.random()*255)+", "+Math.round(Math.random()*255)+", "+Math.round(Math.random()*255)+")";
 			}
 			return array;
 	}
@@ -81,8 +91,27 @@ function PrepareColorChooser(counter){
 }
 
 function start(){
+
+	for(var i=0;i<3;i++){
+		var pens=document.getElementsByName("pen");
+		console.log(pens[i]);
+		pens[i].addEventListener("click",function(e){for(var b=0;b<3;b++){
+																									var pens=document.getElementsByName("pen");
+																									pens[b].setAttribute("class","notClicked");
+																								}
+																								console.log(e.toElement.parentNode.tagName);
+																								if(e.toElement.parentNode.tagName=="TD"){
+																									e.toElement.parentNode.setAttribute("class","clicked");
+																								}
+																								else{
+																									e.toElement.setAttribute("class","clicked");
+																								}
+
+																								});
+	}
+
   prepareDrawPane();
-  new PrepareColorChooser(3);
+	var colorChooser= new PrepareColorChooser(3);
 }
 
 
