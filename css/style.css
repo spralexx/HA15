@@ -29,6 +29,13 @@ width:95%;
 padding:2px;
 }
 
+.clicked{
+  border:5px solid red;
+}
+
+.notClicked{
+  border:2px solid black;
+}
 
 /*##########################right menue#################*/
 
@@ -42,12 +49,16 @@ padding:2px;
   display: block;
   clear: both;
 }
-#draw_pane{
+/*#############################draw pane##################*/
+
+#sketch{
   text-align:center;
-  width:50%;
-  height: 50%;
   margin:auto;
+  width: 400px;
+  height: 400px;
 }
+
+/*##############################footer#####################*/
 
 #footer{
   clear: both;
@@ -57,12 +68,4 @@ padding:2px;
 
 #footer p{
   display:inline;
-}
-
-.clicked{
-  border:5px solid red;
-}
-
-.notClicked{
-  border:2px solid black;
 }

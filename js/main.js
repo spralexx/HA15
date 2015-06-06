@@ -1,6 +1,6 @@
 (function(){
 
-	var choosenColor='';
+var choosenColor='';
 
 function prepareDrawPane() {
 	var canvas = document.querySelector('#paint');
@@ -10,6 +10,8 @@ function prepareDrawPane() {
 	var sketch_style = getComputedStyle(sketch);
 	canvas.width = parseInt(sketch_style.getPropertyValue('width'));
 	canvas.height = parseInt(sketch_style.getPropertyValue('height'));
+
+	console.log(canvas.height);
 
 	var mouse = {x: 0, y: 0};
 
@@ -91,6 +93,7 @@ function PrepareColorChooser(counter){
 }
 
 function start(){
+	var colorchoosersize=3; //3*3
 
 	for(var i=0;i<3;i++){
 		var pens=document.getElementsByName("pen");
@@ -106,12 +109,23 @@ function start(){
 																								else{
 																									e.toElement.setAttribute("class","clicked");
 																								}
-
 																								});
 	}
 
+	for(var b=0;b<3;b++){
+		var pens=document.getElementsByName("pen");
+		pens[b].setAttribute("class","notClicked")
+	}
+
+
   prepareDrawPane();
-	var colorChooser= new PrepareColorChooser(3);
+
+	var colorChooser= new PrepareColorChooser(colorchoosersize);
+	for(var element=3;element<(colorchoosersize*colorchoosersize)+colorchoosersize;element++){
+		var table=document.getElementById("toolsAndColors");
+		var tdsInTable=table.getElementsByTagName("td");
+		tdsInTable[element].setAttribute("class","notClicked");
+	}
 }
 
 
