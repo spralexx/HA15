@@ -18,3 +18,8 @@ Die Paintfunktionalität wurde von http://cssdeck.com/labs/qwtakpii/ kopiert.
 
 Die tabelle für den color picer wird mittels javascript (DOM) angelegt (PrepareColorChooser) der constructor übernimmt
 einen wert (zahl) welcher die anzahl der zeilen udn spalten angibt.
+
+Alle variablen, die mit dem Draw Pane zusammenhängen sind jetzt in einem JSON object zusammengefasst. dies erleichtert das spätere versenden
+der daten an weiter clients.
+
+Ein weiterer Pen wurde hinzugefügt, wobei zur zeit nur einer genutzt wird. (ToDo: auswahl des pens über das linke menue möglich machen)
