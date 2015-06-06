@@ -1,71 +1,79 @@
-header{
-  margin-bottom:1em;
+header {
+  margin-bottom: 1em;
 }
-
-#body_main{
+#body_main {
   width: 100%;
 }
 
 /*############################left menue################*/
-#left_menue{
-  float:left;
-  width:15%;
-}
 
-#left_menue:after{
+#left_menue {
+  float: left;
+  width: 15%;
+}
+#left_menue:after {
   content: '';
   display: block;
   clear: both;
 }
-
-#tool_table table{
-  width:100%;
+#tool_table table {
+  width: 100%;
 }
-
-
-
-#tool_table img{
-width:95%;
-padding:2px;
+#tool_table img {
+  width: 95%;
+  padding: 2px;
 }
-
-.clicked{
-  border:5px solid red;
+.clicked {
+  border: 5px solid red;
 }
-
-.notClicked{
-  border:2px solid black;
+.notClicked {
+  border: 2px solid black;
 }
 
 /*##########################right menue#################*/
 
-#right_menue{
-  float:right;
+#right_menue {
+  float: right;
 }
-
-
-#right_menue:after{
+#right_menue:after {
   content: '';
   display: block;
   clear: both;
 }
+
 /*#############################draw pane##################*/
 
-#sketch{
-  text-align:center;
-  margin:auto;
+#sketch {
+  position: relative;
+  text-align: center;
+  margin: auto;
   width: 400px;
   height: 400px;
+}
+#paint {
+  position: absolute;
+  left: 0px;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  cursor: crosshair;
+}
+#tmp_canvas {
+  position: absolute;
+  left: 0px;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  cursor: crosshair;
 }
 
 /*##############################footer#####################*/
 
-#footer{
+#footer {
   clear: both;
-  display:block;
+  display: block;
   text-align: center;
 }
-
-#footer p{
-  display:inline;
+#footer p {
+  display: inline;
 }
