@@ -23,3 +23,11 @@ Alle variablen, die mit dem Draw Pane zusammenhängen sind jetzt in einem JSON o
 der daten an weiter clients.
 
 Ein weiterer Pen wurde hinzugefügt, wobei zur zeit nur einer genutzt wird. (ToDo: auswahl des pens über das linke menue möglich machen)
+
+Nun sind beide pens nutzbar. die auswähl erfolgt über die eventlistener auf den stiftsymbolen. hierbei wird dann auf "click" die variable "variables.drawPane["choosenPen"]"
+auf die entsprechende id des symbols gesetzt.
+wird nun ein paintevent (mousedown) ausgeführt, so wird via switch abgefragt, welcher pen gerade aktiv ist und dann dementsprechend gezeichnet.
+
+des weiteren ist nun sichtbar, dass pen0 der defaultpen ist, da dieser direkt die css klasse clicked bekommen hat.
+
+todo: farbtabelle nicht mehr random gennerieren. (feste farben)

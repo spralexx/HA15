@@ -1,13 +1,9 @@
 (function() {
 
   var variablesJson = {
-    drawPane: {}
+    drawPane: {},
+    userID: {}
   };
-
-  variablesJson.drawPane["test"] = "teststring";
-  console.log(variablesJson);
-
-  var choosenPen = 'pen1'; //variable that will hold the pen id coming from eventlistener in  start().
 
   function initDrawPane() {
     variablesJson.drawPane["canvas"] = document.querySelector('#paint');
@@ -44,6 +40,7 @@
     variablesJson.drawPane["sprayIntervalID"] = '';
     variablesJson.drawPane["choosenColor"] = '';
     variablesJson.drawPane["offset"] = '';
+    variablesJson.drawPane["choosenPen"] = '';
 
 
     //set event listener
@@ -55,38 +52,69 @@
     }, false);
 
     variablesJson.drawPane["tmp_canvas"].addEventListener('mousedown', function(e) {
-      variablesJson.drawPane["tmp_canvas"].addEventListener('mousemove', variablesJson.drawPane["onPaint"], false);
+      switch (variablesJson.drawPane["choosenPen"]) {
+        case "pen0":
+          variablesJson.drawPane["tmp_ctx"].beginPath();
+          variablesJson.drawPane["tmp_ctx"].moveTo(variablesJson.drawPane["mouse"].x, variablesJson.drawPane["mouse"].y);
+          variablesJson.drawPane["tmp_canvas"].addEventListener('mousemove', variablesJson.drawPane["onPaint"], false);
+          break;
+        case "pen1":
+          variablesJson.drawPane["tmp_canvas"].addEventListener('mousemove', variablesJson.drawPane["onPaint"], false);
 
-      variablesJson.drawPane["mouse"].x = typeof e.offsetX !== 'undefined' ? e.offsetX : e.layerX;
-      variablesJson.drawPane["mouse"].y = typeof e.offsetY !== 'undefined' ? e.offsetY : e.layerY;
+          variablesJson.drawPane["mouse"].x = typeof e.offsetX !== 'undefined' ? e.offsetX : e.layerX;
+          variablesJson.drawPane["mouse"].y = typeof e.offsetY !== 'undefined' ? e.offsetY : e.layerY;
 
-      variablesJson.drawPane["start_mouse"].x = variablesJson.drawPane["mouse"].x;
-      variablesJson.drawPane["start_mouse"].y = variablesJson.drawPane["mouse"].y;
+          variablesJson.drawPane["start_mouse"].x = variablesJson.drawPane["mouse"].x;
+          variablesJson.drawPane["start_mouse"].y = variablesJson.drawPane["mouse"].y;
 
-      variablesJson.drawPane["onPaint"]();
-      sprayIntervalID = setInterval(variablesJson.drawPane["onPaint"], 50);
+          variablesJson.drawPane["onPaint"]();
+          sprayIntervalID = setInterval(variablesJson.drawPane["onPaint"], 50);
+          break;
+      }
+
     }, false);
 
     variablesJson.drawPane["tmp_canvas"].addEventListener('mouseup', function() {
-      variablesJson.drawPane["tmp_canvas"].removeEventListener('mousemove', variablesJson.drawPane["onPaint"], false);
+      console.log("mouseup");
+      switch (variablesJson.drawPane["choosenPen"]) {
+        case "pen0":
+          variablesJson.drawPane["tmp_canvas"].removeEventListener('mousemove', variablesJson.drawPane["onPaint"], false);
 
-      // Writing down to real canvas now
-      variablesJson.drawPane["ctx"].drawImage(variablesJson.drawPane["tmp_canvas"], 0, 0);
-      // Clearing tmp canvas
-      variablesJson.drawPane["tmp_ctx"].clearRect(0, 0, variablesJson.drawPane["tmp_canvas"].width, variablesJson.drawPane["tmp_canvas"].height);
+          break;
+        case "pen1":
+          variablesJson.drawPane["tmp_canvas"].removeEventListener('mousemove', variablesJson.drawPane["onPaint"], false);
 
-      clearInterval(sprayIntervalID);
+          // Writing down to real canvas now
+          variablesJson.drawPane["ctx"].drawImage(variablesJson.drawPane["tmp_canvas"], 0, 0);
+          // Clearing tmp canvas
+          variablesJson.drawPane["tmp_ctx"].clearRect(0, 0, variablesJson.drawPane["tmp_canvas"].width, variablesJson.drawPane["tmp_canvas"].height);
+
+          clearInterval(sprayIntervalID);
+          break;
+      }
     }, false);
 
     variablesJson.drawPane["onPaint"] = function() {
 
-      // Tmp canvas is always cleared up before drawing.
-      // variablesJson.drawPane["tmp_ctx"].clearRect(0, 0, variablesJson.drawPane["tmp_canvas"].width, variablesJson.drawPane["tmp_canvas"].height);
+      switch (variablesJson.drawPane["choosenPen"]) {
+        case "pen0":
+          variablesJson.drawPane["tmp_ctx"].strokeStyle = variablesJson.drawPane["choosenColor"];
+          variablesJson.drawPane["tmp_ctx"].lineTo(variablesJson.drawPane["mouse"].x, variablesJson.drawPane["mouse"].y);
+          variablesJson.drawPane["tmp_ctx"].stroke();
+          break;
+        case "pen1":
 
-      var x = variablesJson.drawPane["mouse"].x;
-      var y = variablesJson.drawPane["mouse"].y;
+          // Tmp canvas is always cleared up before drawing.
+          // variablesJson.drawPane["tmp_ctx"].clearRect(0, 0, variablesJson.drawPane["tmp_canvas"].width, variablesJson.drawPane["tmp_canvas"].height);
 
-      variablesJson.drawPane["generateSprayParticles"]();
+          variablesJson.drawPane["generateSprayParticles"]();
+
+          break;
+        case "pen2":
+
+          break;
+      }
+
 
 
     }
@@ -128,19 +156,6 @@
   function drawOnCanvas() {
     switch (choosenPen) {
       case "pen0":
-        var canvas = document.querySelector('#paint');
-        var ctx = canvas.getContext('2d');
-
-        var sketch = document.querySelector('#sketch');
-        var sketch_style = getComputedStyle(sketch);
-        canvas.width = parseInt(sketch_style.getPropertyValue('width'));
-        canvas.height = parseInt(sketch_style.getPropertyValue('height'));
-
-        var mouse = {
-          x: 0,
-          y: 0
-        };
-
         /* Mouse Capturing Work */
         canvas.addEventListener('mousemove', function(e) {
           mouse.x = e.pageX - this.offsetLeft;
@@ -170,9 +185,6 @@
           ctx.stroke();
         }
         break;
-      case "pen1":
-        break;
-      case "pen2":
     }
 
   }
@@ -199,7 +211,6 @@
           var tdsInTable = table.getElementsByTagName("td");
 
           for (var element = 3; element < (counter * counter) + 3; element++) {
-            console.log(element);
             tdsInTable[element].setAttribute("class", "notClicked");
           }
           e.toElement.setAttribute("class", "clicked");
@@ -265,12 +276,29 @@
     variablesJson.drawPane["tmp_ctx"].strokeStyle = 'blue';
     variablesJson.drawPane["tmp_ctx"].fillStyle = 'blue'; //blue is default color
 
+    pens[0].setAttribute("class", "clicked");
+    variablesJson.drawPane["choosenPen"] = 'pen0';
+
     var colorChooser = new PrepareColorChooser(colorchoosersize);
     for (var element = 3; element < (colorchoosersize * colorchoosersize) + colorchoosersize; element++) {
       var table = document.getElementById("toolsAndColors");
       var tdsInTable = table.getElementsByTagName("td");
       tdsInTable[element].setAttribute("class", "notClicked");
     }
+
+    variablesJson.userID["uuid"] = generateUUID();
+    console.log("init done:");
+    console.log(variablesJson);
+  }
+
+  function generateUUID() {
+    var d = new Date().getTime();
+    var uuid = 'xxxxxxxx-xxxx-xxxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      var r = (d + Math.random() * 16) % 16 | 0;
+      d = Math.floor(d / 16);
+      return (c == 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+    });
+    return uuid;
   }
 
 
