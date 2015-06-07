@@ -59,6 +59,20 @@
           variablesJson.drawPane["tmp_canvas"].addEventListener('mousemove', variablesJson.drawPane["onPaint"], false);
           break;
         case "pen1":
+
+					//try unsetting the intervall in case we havent correctly unset it when leaving the draw pane.
+					try{
+						clearInterval(sprayIntervalID);
+					}
+					catch(e){
+						console.log(e);
+					}
+
+          // Writing down to real canvas now
+          variablesJson.drawPane["ctx"].drawImage(variablesJson.drawPane["tmp_canvas"], 0, 0);
+          // Clearing tmp canvas
+          variablesJson.drawPane["tmp_ctx"].clearRect(0, 0, variablesJson.drawPane["tmp_canvas"].width, variablesJson.drawPane["tmp_canvas"].height);
+
           variablesJson.drawPane["tmp_canvas"].addEventListener('mousemove', variablesJson.drawPane["onPaint"], false);
 
           variablesJson.drawPane["mouse"].x = typeof e.offsetX !== 'undefined' ? e.offsetX : e.layerX;
@@ -83,12 +97,6 @@
           break;
         case "pen1":
           variablesJson.drawPane["tmp_canvas"].removeEventListener('mousemove', variablesJson.drawPane["onPaint"], false);
-
-          // Writing down to real canvas now
-          variablesJson.drawPane["ctx"].drawImage(variablesJson.drawPane["tmp_canvas"], 0, 0);
-          // Clearing tmp canvas
-          variablesJson.drawPane["tmp_ctx"].clearRect(0, 0, variablesJson.drawPane["tmp_canvas"].width, variablesJson.drawPane["tmp_canvas"].height);
-
           clearInterval(sprayIntervalID);
           break;
       }
