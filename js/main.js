@@ -2,14 +2,16 @@
 
   var variablesJson = {
     "drawPane": {
-      "sendable": {}
+      "sendable": {
+        "userID": {}
+      }
     },
     "userID": {}
   };
 
 
 
-  var websocketConnection;
+  var ws;
 
 
   function initDrawPane() {
@@ -61,6 +63,10 @@
     variablesJson.drawPane["tmp_canvas"].addEventListener('mousedown', function(e) {
       switch (variablesJson.drawPane.sendable["choosenPen"]) {
         case "pen0":
+          // Writing down to real canvas now
+          variablesJson.drawPane["ctx"].drawImage(variablesJson.drawPane["tmp_canvas"], 0, 0);
+          // Clearing tmp canvas
+          variablesJson.drawPane["tmp_ctx"].clearRect(0, 0, variablesJson.drawPane["tmp_canvas"].width, variablesJson.drawPane["tmp_canvas"].height);
           variablesJson.drawPane["tmp_ctx"].beginPath();
           variablesJson.drawPane["tmp_ctx"].moveTo(variablesJson.drawPane.sendable["mouse"].x, variablesJson.drawPane.sendable["mouse"].y);
           variablesJson.drawPane["tmp_canvas"].addEventListener('mousemove', variablesJson.drawPane["onPaint"], false);
@@ -99,7 +105,6 @@
       switch (variablesJson.drawPane.sendable["choosenPen"]) {
         case "pen0":
           variablesJson.drawPane["tmp_canvas"].removeEventListener('mousemove', variablesJson.drawPane["onPaint"], false);
-
           break;
         case "pen1":
           variablesJson.drawPane["tmp_canvas"].removeEventListener('mousemove', variablesJson.drawPane["onPaint"], false);
@@ -109,6 +114,7 @@
     }, false);
 
     variablesJson.drawPane["onPaint"] = function() {
+      sendDrawInstructions();
 
       switch (variablesJson.drawPane.sendable["choosenPen"]) {
         case "pen0":
@@ -164,6 +170,26 @@
     }
 
 
+  }
+
+  function sendDrawInstructions() {
+    var stringToSend = JSON.stringify(variablesJson.drawPane.sendable);
+    while (stringToSend.length != 0) {
+      console.log(stringToSend);
+      if (ws.readyState == 1) {
+        console.log(JSON.stringify(variablesJson.drawPane.sendable).length);
+        ws.send(stringToSend.substring(0,200));
+        stringToSend = stringToSend.substring(199, stringToSend.length);
+      } else {
+        console.log("##############ws has been closed. reconnecting...");
+        ws = new ConnectToWebsocketBroadcastServer();
+        ws.onopen = function() {
+          this.send("gibUrlUndPort");
+          this.send(stringToSend.substring(0,200));
+          stringToSend = stringToSend.substring(199, stringToSend.length);
+        }
+      }
+    }
   }
 
 
@@ -301,35 +327,58 @@
       tdsInTable[element].setAttribute("class", "notClicked");
     }
 
-    variablesJson.userID["uuid"] = generateUUID();
+    variablesJson.drawPane.sendable.userID["uuid"] = generateUUID();
     console.log("init done:");
     console.log(JSON.stringify(variablesJson.userID));
     console.log(JSON.stringify(variablesJson.drawPane.sendable));
     console.log(variablesJson);
     //console.log(variablesJson);
 
+    var storeSplittedMessage = '';
+    ws = new ConnectToWebsocketBroadcastServer();
+
+    ws.onmessage = function(e) {
+      console.log(storeSplittedMessage);
+      if (e.data.substring(0, 3) == "+++") {
+        console.log(e.data);
+      } else {
+        try {
+          var receivedJSON=JSON.parse(storeSplittedMessage + e.data)
+          processReceivedJSON(receivedJSON);
+          storeSplittedMessage='';
+        } catch (err) {
+          storeSplittedMessage = storeSplittedMessage + e.data;
+          //console.log(storeSplittedMessage);
+          //console.log("ERROR!!: " + err.message);
+        }
+      }
+    };
+
+
+  }
+function processReceivedJSON(received){
+  console.log(received);
+
+}
+
+  function ConnectToWebsocketBroadcastServer() {
+
     //init connection to websocket broadcast server
     try {
-      websocketConnection = new WebSocket("ws://localhost:8080");
+      this.websocketConnection = new WebSocket("ws://localhost:8080");
 
-      websocketConnection.onopen = function() {
-        console.log(this.readyState);
-        websocketConnection.send("gibUrlUndPort");
-        websocketConnection.send(JSON.stringify(variablesJson.drawPane.sendable));
+      this.websocketConnection.onopen = function() {
+        //console.log(this.readyState);
+        this.send("gibUrlUndPort");
       };
-      websocketConnection.onmessage = function(e) {
-        console.log(e.data);
 
-      };
-      websocketConnection.onclose = function() {
-        schreib("Verbindung beendet, readyState: " + this.readyState);
-        $("pServerID").textContent = "keine Verbindung";
+      this.websocketConnection.onclose = function() {
+        console.log("Verbindung beendet, readyState: " + this.readyState);
       };
     } catch (e) {
       console.log("ERROR!!: " + e.message);
     }
-
-
+    return this.websocketConnection;
 
     ///////////////////////////////////////////////
   }
