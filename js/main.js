@@ -4,25 +4,22 @@
     "drawPane": {
       "sendable": {
         "userID": {}
+      },
+      "received":{
       }
     },
     "userID": {}
   };
 
-
-
   var ws;
-
 
   function initDrawPane() {
     variablesJson.drawPane["canvas"] = document.querySelector('#paint');
     variablesJson.drawPane["ctx"] = variablesJson.drawPane["canvas"].getContext('2d');
-
     variablesJson.drawPane["sketch"] = document.querySelector('#sketch');
     variablesJson.drawPane["sketch_style"] = getComputedStyle(variablesJson.drawPane["sketch"]);
     variablesJson.drawPane["canvas"].width = parseInt(variablesJson.drawPane["sketch_style"].getPropertyValue('width'));
     variablesJson.drawPane["canvas"].height = parseInt(variablesJson.drawPane["sketch_style"].getPropertyValue('height'));
-
 
     // Creating a tmp canvas
     variablesJson.drawPane["tmp_canvas"] = document.createElement('canvas');
@@ -30,9 +27,7 @@
     variablesJson.drawPane["tmp_canvas"].id = 'tmp_canvas';
     variablesJson.drawPane["tmp_canvas"].width = variablesJson.drawPane["canvas"].width;
     variablesJson.drawPane["tmp_canvas"].height = variablesJson.drawPane["canvas"].height;
-
     variablesJson.drawPane["sketch"].appendChild(variablesJson.drawPane["tmp_canvas"]);
-
     variablesJson.drawPane.sendable["mouse"] = {
       x: 0,
       y: 0
@@ -45,12 +40,10 @@
       x: 0,
       y: 0
     };
-
     variablesJson.drawPane.sendable["sprayIntervalID"] = '';
     variablesJson.drawPane.sendable["choosenColor"] = '';
     variablesJson.drawPane.sendable["offset"] = '';
     variablesJson.drawPane.sendable["choosenPen"] = '';
-
 
     //set event listener
 
@@ -358,6 +351,8 @@
   }
 function processReceivedJSON(received){
   console.log(received);
+  variablesJson.drawPane.received=received;
+  console.log(variablesJson);
 
 }
 
@@ -385,7 +380,7 @@ function processReceivedJSON(received){
 
   function generateUUID() {
     var d = new Date().getTime();
-    var uuid = 'xxxxxxxx-xxxx-xxxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var uuid = 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
       var r = (d + Math.random() * 16) % 16 | 0;
       d = Math.floor(d / 16);
       return (c == 'x' ? r : (r & 0x3 | 0x8)).toString(16);
