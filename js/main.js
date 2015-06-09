@@ -88,7 +88,7 @@
           variablesJson.drawPane.sendable["start_mouse"].x = variablesJson.drawPane.sendable["mouse"].x;
           variablesJson.drawPane.sendable["start_mouse"].y = variablesJson.drawPane.sendable["mouse"].y;
 
-        //  console.log(variablesJson.drawPane.sendable["start_mouse"].x);
+          //  console.log(variablesJson.drawPane.sendable["start_mouse"].x);
 
           variablesJson.drawPane["onPaint"]();
           variablesJson.drawPane.sendable["sprayIntervalID"] = setInterval(variablesJson.drawPane["onPaint"], 50);
@@ -172,12 +172,12 @@
   function sendDrawInstructions() {
     var stringToSend = JSON.stringify(variablesJson.drawPane.sendable);
     while (stringToSend.length != 0) {
-    //  console.log(stringToSend);
+      //  console.log(stringToSend);
       //console.log(variablesJson);
       if (ws.readyState == 1) {
         //console.log(JSON.stringify(variablesJson.drawPane.sendable).length);
         ws.send(stringToSend.substring(0, 200));
-        console.log("String sent: "+stringToSend.substring(0, 200));
+        console.log("String sent: " + stringToSend.substring(0, 200));
         stringToSend = stringToSend.substring(200, stringToSend.length);
       } else {
         //console.log("##############ws has been closed. reconnecting...");
@@ -207,7 +207,7 @@
         this.space = document.createElement("br");
         this.td.addEventListener("click", function(e) {
           variablesJson.drawPane.sendable["choosenColor"] = e.toElement.style.backgroundColor;
-        //  console.log(variablesJson.drawPane.sendable["choosenColor"]);
+          //  console.log(variablesJson.drawPane.sendable["choosenColor"]);
           var table = document.getElementById("toolsAndColors");
           var tdsInTable = table.getElementsByTagName("td");
 
@@ -228,10 +228,10 @@
     }
 
     function returnColorArray(size) {
-      var array = [];
-      for (var i = 0; i < (size * size); i++) {
-        array[i] = "rgb(" + Math.round(Math.random() * 255) + ", " + Math.round(Math.random() * 255) + ", " + Math.round(Math.random() * 255) + ")";
-      }
+      var array = ['blue', 'red', 'yellow', 'green', 'lightblue', 'purple', 'orange', 'lightgreen', 'black'];
+      //  for (var i = 0; i < (size * size); i++) {
+      //    array[i] = "rgb(" + Math.round(Math.random() * 255) + ", " + Math.round(Math.random() * 255) + ", " + Math.round(Math.random() * 255) + ")";
+      //  }
       return array;
     }
 
@@ -278,7 +278,7 @@
     variablesJson.drawPane["tmp_ctx"].lineCap = 'round';
     variablesJson.drawPane["tmp_ctx"].strokeStyle = 'blue';
     variablesJson.drawPane["tmp_ctx"].fillStyle = 'blue'; //blue is default color
-    variablesJson.drawPane.sendable["choosenColor"]='blue';
+    variablesJson.drawPane.sendable["choosenColor"] = 'blue';
 
     pens[0].setAttribute("class", "clicked");
     variablesJson.drawPane.sendable["choosenPen"] = 'pen0';
