@@ -59,6 +59,7 @@
           variablesJson.drawPane["ctx"].drawImage(variablesJson.drawPane["tmp_canvas"], 0, 0);
           // Clearing tmp canvas
           variablesJson.drawPane["tmp_ctx"].clearRect(0, 0, variablesJson.drawPane["tmp_canvas"].width, variablesJson.drawPane["tmp_canvas"].height);
+          variablesJson.drawPane["tmp_ctx"].strokeStyle = variablesJson.drawPane.sendable["choosenColor"];
           variablesJson.drawPane["tmp_ctx"].beginPath();
           variablesJson.drawPane.sendable["start_mouse"].x = variablesJson.drawPane.sendable["mouse"].x;
           variablesJson.drawPane.sendable["start_mouse"].y = variablesJson.drawPane.sendable["mouse"].y;
@@ -114,7 +115,6 @@
 
       switch (variablesJson.drawPane.sendable["choosenPen"]) {
         case "pen0":
-          variablesJson.drawPane["tmp_ctx"].strokeStyle = variablesJson.drawPane.sendable["choosenColor"];
           variablesJson.drawPane["tmp_ctx"].lineTo(variablesJson.drawPane.sendable["mouse"].x, variablesJson.drawPane.sendable["mouse"].y);
           variablesJson.drawPane.sendable["start_mouse"].x = variablesJson.drawPane.sendable["mouse"].x;
           variablesJson.drawPane.sendable["start_mouse"].y = variablesJson.drawPane.sendable["mouse"].y;
@@ -278,6 +278,7 @@
     variablesJson.drawPane["tmp_ctx"].lineCap = 'round';
     variablesJson.drawPane["tmp_ctx"].strokeStyle = 'blue';
     variablesJson.drawPane["tmp_ctx"].fillStyle = 'blue'; //blue is default color
+    variablesJson.drawPane.sendable["choosenColor"]='blue';
 
     pens[0].setAttribute("class", "clicked");
     variablesJson.drawPane.sendable["choosenPen"] = 'pen0';
@@ -300,7 +301,7 @@
     ws = new ConnectToWebsocketBroadcastServer();
 
     ws.onmessage = function(e) {
-      //console.log(storeSplittedMessage);
+      console.log(e.data);
       if (e.data.substring(0, 3) == "+++") {
         //    console.log(e.data);
       } else {
@@ -390,7 +391,7 @@
 
     //init connection to websocket broadcast server
     try {
-      this.websocketConnection = new WebSocket("ws://localhost:8080");
+      this.websocketConnection = new WebSocket("ws://mediengeil.org:8080");
 
       this.websocketConnection.onopen = function() {
         //console.log(this.readyState);
