@@ -289,13 +289,14 @@
       var table = document.getElementById("toolsAndColors");
       var tdsInTable = table.getElementsByTagName("td");
       tdsInTable[element].setAttribute("class", "notClicked");
-      if(element==11){
+      if (element == 11) {
         tdsInTable[element].setAttribute("class", "clicked");
       }
 
     }
 
     variablesJson.drawPane.sendable.userID["uuid"] = generateUUID();
+    variablesJson.drawPane.sendable["groupName"]=generateUUID();
     //console.log("init done:");
     //console.log(JSON.stringify(variablesJson.userID));
     //console.log(JSON.stringify(variablesJson.drawPane.sendable));
@@ -312,7 +313,10 @@
       } else {
         try {
           var receivedJSON = JSON.parse(storeSplittedMessage + e.data)
-          processReceivedJSON(receivedJSON);
+          variablesJson.drawPane.received = receivedJSON;
+          if (variablesJson.drawPane.received["groupName"] == variablesJson.drawPane.sendable["groupName"]) {
+            drawReceived();
+          }
           storeSplittedMessage = '';
         } catch (err) {
           storeSplittedMessage = storeSplittedMessage + e.data;
@@ -321,15 +325,32 @@
         }
       }
     };
-
+    handleGroupConnect();
 
   }
 
-  function processReceivedJSON(received) {
-    //console.log(received);
-    variablesJson.drawPane.received = received;
-    //console.log(variablesJson);
-    drawReceived();
+  function handleGroupConnect() {
+    var groupConnectButton = document.getElementById("groupConnectButton");
+    groupConnectButton.addEventListener('click', function test(e) {
+      e.preventDefault();
+      variablesJson.drawPane.sendable["groupName"] = document.getElementById("groupName").value;
+      console.log("Gruppenname: " + variablesJson.drawPane.sendable["groupName"]);
+      var groupNameInHtml=document.createElement("P");
+      var text=document.createTextNode(variablesJson.drawPane.sendable["groupName"]);
+      groupNameInHtml.appendChild(text);
+      document.getElementById("group-input-form").appendChild(groupNameInHtml);
+      groupConnectButton.removeEventListener('click', test, false);
+      groupConnectButton.value = "Von Gruppe trennen";
+      groupConnectButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        document.getElementById("group-input-form").removeChild(groupNameInHtml);
+        groupConnectButton.value="Mit Gruppe verbinden";
+        variablesJson.drawPane.sendable["groupName"]=generateUUID(); //beacause a uuid is as its name says universal unique no other client will have the same groupname so no draw instructions that will be received will be shown
+        handleGroupConnect();
+      },false);
+
+    }, false);
+
   }
 
   function drawReceived() {

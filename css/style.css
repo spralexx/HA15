@@ -30,6 +30,10 @@ header {
   border: 2px solid black;
 }
 
+#group-input-form{
+  margin-bottom:1em;
+}
+
 /*##########################right menue#################*/
 
 #right_menue {
