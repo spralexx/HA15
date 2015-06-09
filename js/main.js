@@ -87,7 +87,7 @@
           variablesJson.drawPane.sendable["start_mouse"].x = variablesJson.drawPane.sendable["mouse"].x;
           variablesJson.drawPane.sendable["start_mouse"].y = variablesJson.drawPane.sendable["mouse"].y;
 
-          console.log(variablesJson.drawPane.sendable["start_mouse"].x);
+        //  console.log(variablesJson.drawPane.sendable["start_mouse"].x);
 
           variablesJson.drawPane["onPaint"]();
           variablesJson.drawPane.sendable["sprayIntervalID"] = setInterval(variablesJson.drawPane["onPaint"], 50);
@@ -97,7 +97,7 @@
     }, false);
 
     variablesJson.drawPane["tmp_canvas"].addEventListener('mouseup', function() {
-      console.log("mouseup");
+      //console.log("mouseup");
       switch (variablesJson.drawPane.sendable["choosenPen"]) {
         case "pen0":
           variablesJson.drawPane["tmp_canvas"].removeEventListener('mousemove', variablesJson.drawPane["onPaint"], false);
@@ -172,19 +172,20 @@
   function sendDrawInstructions() {
     var stringToSend = JSON.stringify(variablesJson.drawPane.sendable);
     while (stringToSend.length != 0) {
-      console.log(stringToSend);
+    //  console.log(stringToSend);
       //console.log(variablesJson);
       if (ws.readyState == 1) {
-        console.log(JSON.stringify(variablesJson.drawPane.sendable).length);
+        //console.log(JSON.stringify(variablesJson.drawPane.sendable).length);
         ws.send(stringToSend.substring(0, 200));
-        stringToSend = stringToSend.substring(199, stringToSend.length);
+        console.log("String sent: "+stringToSend.substring(0, 200));
+        stringToSend = stringToSend.substring(200, stringToSend.length);
       } else {
-        console.log("##############ws has been closed. reconnecting...");
+        //console.log("##############ws has been closed. reconnecting...");
         ws = new ConnectToWebsocketBroadcastServer();
         ws.onopen = function() {
           this.send("gibUrlUndPort");
           this.send(stringToSend.substring(0, 200));
-          stringToSend = stringToSend.substring(199, stringToSend.length);
+          stringToSend = stringToSend.substring(200, stringToSend.length);
         }
       }
     }
@@ -193,7 +194,7 @@
   function PrepareColorChooser(counter) {
 
     var colorArray = returnColorArray(counter);
-    console.log(colorArray);
+    //console.log(colorArray);
     var colorCounter = colorArray.length - 1;
 
     for (var i = 0; i < counter; i++) {
@@ -206,7 +207,7 @@
         this.space = document.createElement("br");
         this.td.addEventListener("click", function(e) {
           variablesJson.drawPane.sendable["choosenColor"] = e.toElement.style.backgroundColor;
-          console.log(variablesJson.drawPane.sendable["choosenColor"]);
+        //  console.log(variablesJson.drawPane.sendable["choosenColor"]);
           var table = document.getElementById("toolsAndColors");
           var tdsInTable = table.getElementsByTagName("td");
 
@@ -242,13 +243,13 @@
 
     for (var i = 0; i < 3; i++) {
       var pens = document.getElementsByName("pen");
-      console.log(pens[i]);
+      //console.log(pens[i]);
       pens[i].addEventListener("click", function(e) {
         for (var b = 0; b < 3; b++) {
           var pens = document.getElementsByName("pen");
           pens[b].setAttribute("class", "notClicked");
         }
-        console.log(e.toElement.parentNode.tagName);
+        //console.log(e.toElement.parentNode.tagName);
         if (e.toElement.parentNode.tagName == "TD") {
           e.toElement.parentNode.setAttribute("class", "clicked");
           variablesJson.drawPane.sendable["choosenPen"] = e.toElement.parentNode.id;
@@ -289,10 +290,10 @@
     }
 
     variablesJson.drawPane.sendable.userID["uuid"] = generateUUID();
-    console.log("init done:");
-    console.log(JSON.stringify(variablesJson.userID));
-    console.log(JSON.stringify(variablesJson.drawPane.sendable));
-    console.log(variablesJson);
+    //console.log("init done:");
+    //console.log(JSON.stringify(variablesJson.userID));
+    //console.log(JSON.stringify(variablesJson.drawPane.sendable));
+    //console.log(variablesJson);
     //console.log(variablesJson);
 
     var storeSplittedMessage = '';
@@ -326,12 +327,12 @@
   }
 
   function drawReceived() {
-    console.log("drawReceived");
+    //console.log(variablesJson.drawPane.received);
 
     variablesJson.drawPane.received["generateSprayParticles"] = function() {
 
-        console.log("recieved paint pen1");
-      console.log(variablesJson.drawPane.received);
+      //console.log("received paint pen1");
+      //console.log(variablesJson.drawPane.received);
       // Particle count, or, density
       var density = 50;
 
@@ -340,7 +341,6 @@
 
         var x = variablesJson.drawPane.received["mouse"].x + variablesJson.drawPane.received["offset"].x;
         var y = variablesJson.drawPane.received["mouse"].y + variablesJson.drawPane.received["offset"].y;
-
         variablesJson.drawPane["tmp_ctx"].fillStyle = variablesJson.drawPane.received["choosenColor"];
 
         variablesJson.drawPane["tmp_ctx"].fillRect(x, y, 1, 1);
@@ -358,6 +358,7 @@
         variablesJson.drawPane["tmp_ctx"].beginPath();
         variablesJson.drawPane["tmp_ctx"].moveTo(variablesJson.drawPane.received["start_mouse"].x, variablesJson.drawPane.received["start_mouse"].y);
 
+        //console.log(variablesJson.drawPane.received["choosenColor"]);
         variablesJson.drawPane["tmp_ctx"].strokeStyle = variablesJson.drawPane.received["choosenColor"];
         variablesJson.drawPane["tmp_ctx"].lineTo(variablesJson.drawPane.received["mouse"].x, variablesJson.drawPane.received["mouse"].y);
         variablesJson.drawPane["tmp_ctx"].stroke();
@@ -369,7 +370,7 @@
         try {
           clearInterval(variablesJson.drawPane.received["sprayIntervalID"]);
         } catch (e) {
-          console.log(e);
+          //console.log(e);
         }
 
         // Writing down to real canvas now
@@ -379,7 +380,7 @@
 
         variablesJson.drawPane.received["generateSprayParticles"]();
 
-      //  variablesJson.drawPane.received["sprayIntervalID"] = setInterval(variablesJson.drawPane["onPaint"], 50);
+        //  variablesJson.drawPane.received["sprayIntervalID"] = setInterval(variablesJson.drawPane["onPaint"], 50);
         break;
     }
 
@@ -397,10 +398,10 @@
       };
 
       this.websocketConnection.onclose = function() {
-        console.log("Verbindung beendet, readyState: " + this.readyState);
+        //console.log("Verbindung beendet, readyState: " + this.readyState);
       };
     } catch (e) {
-      console.log("ERROR!!: " + e.message);
+      //console.log("ERROR!!: " + e.message);
     }
     return this.websocketConnection;
 
