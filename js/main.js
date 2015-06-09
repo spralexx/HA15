@@ -5,8 +5,7 @@
       "sendable": {
         "userID": {}
       },
-      "received":{
-      }
+      "received": {}
     },
     "userID": {}
   };
@@ -127,9 +126,6 @@
 
           break;
       }
-
-
-
     }
 
     variablesJson.drawPane["generateSprayParticles"] = function() {
@@ -171,57 +167,19 @@
       console.log(stringToSend);
       if (ws.readyState == 1) {
         console.log(JSON.stringify(variablesJson.drawPane.sendable).length);
-        ws.send(stringToSend.substring(0,200));
+        ws.send(stringToSend.substring(0, 200));
         stringToSend = stringToSend.substring(199, stringToSend.length);
       } else {
         console.log("##############ws has been closed. reconnecting...");
         ws = new ConnectToWebsocketBroadcastServer();
         ws.onopen = function() {
           this.send("gibUrlUndPort");
-          this.send(stringToSend.substring(0,200));
+          this.send(stringToSend.substring(0, 200));
           stringToSend = stringToSend.substring(199, stringToSend.length);
         }
       }
     }
   }
-
-
-  function drawOnCanvas() {
-    switch (choosenPen) {
-      case "pen0":
-        /* Mouse Capturing Work */
-        canvas.addEventListener('mousemove', function(e) {
-          mouse.x = e.pageX - this.offsetLeft;
-          mouse.y = e.pageY - this.offsetTop;
-        }, false);
-
-        /* Drawing on Paint App */
-        ctx.lineWidth = 5;
-        ctx.lineJoin = 'round';
-        ctx.lineCap = 'round';
-        ctx.strokeStyle = 'blue';
-
-        canvas.addEventListener('mousedown', function(e) {
-          ctx.beginPath();
-          ctx.moveTo(mouse.x, mouse.y);
-
-          canvas.addEventListener('mousemove', onPaint, false);
-        }, false);
-
-        canvas.addEventListener('mouseup', function() {
-          canvas.removeEventListener('mousemove', onPaint, false);
-        }, false);
-
-        var onPaint = function() {
-          ctx.strokeStyle = choosenColor;
-          ctx.lineTo(mouse.x, mouse.y);
-          ctx.stroke();
-        }
-        break;
-    }
-
-  }
-
 
   function PrepareColorChooser(counter) {
 
@@ -336,9 +294,9 @@
         console.log(e.data);
       } else {
         try {
-          var receivedJSON=JSON.parse(storeSplittedMessage + e.data)
+          var receivedJSON = JSON.parse(storeSplittedMessage + e.data)
           processReceivedJSON(receivedJSON);
-          storeSplittedMessage='';
+          storeSplittedMessage = '';
         } catch (err) {
           storeSplittedMessage = storeSplittedMessage + e.data;
           //console.log(storeSplittedMessage);
@@ -349,10 +307,15 @@
 
 
   }
-function processReceivedJSON(received){
-  console.log(received);
-  variablesJson.drawPane.received=received;
-  console.log(variablesJson);
+
+  function processReceivedJSON(received) {
+    //console.log(received);
+    variablesJson.drawPane.received = received;
+    //console.log(variablesJson);
+    drawReceived();
+  }
+
+function drawReceived(){
 
 }
 
