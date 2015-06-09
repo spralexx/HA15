@@ -44,6 +44,10 @@
     variablesJson.drawPane.sendable["offset"] = '';
     variablesJson.drawPane.sendable["choosenPen"] = '';
 
+
+  }
+
+  function setDrawEventListener(){
     //set event listener
 
     /* Mouse Capturing Work */
@@ -260,6 +264,7 @@
 
     initDrawPane();
     //set defaults for initDrawPane()
+    setDrawEventListener();
 
     /* Drawing on Paint App */
     variablesJson.drawPane["tmp_ctx"].lineWidth = 5;
