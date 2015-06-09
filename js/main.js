@@ -35,10 +35,6 @@
       x: 0,
       y: 0
     };
-    variablesJson.drawPane.sendable["last_mouse"] = {
-      x: 0,
-      y: 0
-    };
     variablesJson.drawPane.sendable["sprayIntervalID"] = '';
     variablesJson.drawPane.sendable["choosenColor"] = '';
     variablesJson.drawPane.sendable["offset"] = '';
@@ -47,7 +43,7 @@
 
   }
 
-  function setDrawEventListener(){
+  function setDrawEventListener() {
     //set event listener
 
     /* Mouse Capturing Work */
@@ -64,6 +60,8 @@
           // Clearing tmp canvas
           variablesJson.drawPane["tmp_ctx"].clearRect(0, 0, variablesJson.drawPane["tmp_canvas"].width, variablesJson.drawPane["tmp_canvas"].height);
           variablesJson.drawPane["tmp_ctx"].beginPath();
+          variablesJson.drawPane.sendable["start_mouse"].x = variablesJson.drawPane.sendable["mouse"].x;
+          variablesJson.drawPane.sendable["start_mouse"].y = variablesJson.drawPane.sendable["mouse"].y;
           variablesJson.drawPane["tmp_ctx"].moveTo(variablesJson.drawPane.sendable["mouse"].x, variablesJson.drawPane.sendable["mouse"].y);
           variablesJson.drawPane["tmp_canvas"].addEventListener('mousemove', variablesJson.drawPane["onPaint"], false);
           break;
@@ -88,6 +86,8 @@
 
           variablesJson.drawPane.sendable["start_mouse"].x = variablesJson.drawPane.sendable["mouse"].x;
           variablesJson.drawPane.sendable["start_mouse"].y = variablesJson.drawPane.sendable["mouse"].y;
+
+          console.log(variablesJson.drawPane.sendable["start_mouse"].x);
 
           variablesJson.drawPane["onPaint"]();
           variablesJson.drawPane.sendable["sprayIntervalID"] = setInterval(variablesJson.drawPane["onPaint"], 50);
@@ -116,6 +116,8 @@
         case "pen0":
           variablesJson.drawPane["tmp_ctx"].strokeStyle = variablesJson.drawPane.sendable["choosenColor"];
           variablesJson.drawPane["tmp_ctx"].lineTo(variablesJson.drawPane.sendable["mouse"].x, variablesJson.drawPane.sendable["mouse"].y);
+          variablesJson.drawPane.sendable["start_mouse"].x = variablesJson.drawPane.sendable["mouse"].x;
+          variablesJson.drawPane.sendable["start_mouse"].y = variablesJson.drawPane.sendable["mouse"].y;
           variablesJson.drawPane["tmp_ctx"].stroke();
           break;
         case "pen1":
@@ -124,6 +126,8 @@
           // variablesJson.drawPane["tmp_ctx"].clearRect(0, 0, variablesJson.drawPane["tmp_canvas"].width, variablesJson.drawPane["tmp_canvas"].height);
 
           variablesJson.drawPane["generateSprayParticles"]();
+          variablesJson.drawPane.sendable["start_mouse"].x = variablesJson.drawPane.sendable["mouse"].x;
+          variablesJson.drawPane.sendable["start_mouse"].y = variablesJson.drawPane.sendable["mouse"].y;
 
           break;
         case "pen2":
@@ -169,6 +173,7 @@
     var stringToSend = JSON.stringify(variablesJson.drawPane.sendable);
     while (stringToSend.length != 0) {
       console.log(stringToSend);
+      //console.log(variablesJson);
       if (ws.readyState == 1) {
         console.log(JSON.stringify(variablesJson.drawPane.sendable).length);
         ws.send(stringToSend.substring(0, 200));
@@ -294,9 +299,9 @@
     ws = new ConnectToWebsocketBroadcastServer();
 
     ws.onmessage = function(e) {
-      console.log(storeSplittedMessage);
+      //console.log(storeSplittedMessage);
       if (e.data.substring(0, 3) == "+++") {
-        console.log(e.data);
+        //    console.log(e.data);
       } else {
         try {
           var receivedJSON = JSON.parse(storeSplittedMessage + e.data)
@@ -320,9 +325,65 @@
     drawReceived();
   }
 
-function drawReceived(){
+  function drawReceived() {
+    console.log("drawReceived");
 
-}
+    variablesJson.drawPane.received["generateSprayParticles"] = function() {
+
+        console.log("recieved paint pen1");
+      console.log(variablesJson.drawPane.received);
+      // Particle count, or, density
+      var density = 50;
+
+      for (var i = 0; i < density; i++) {
+        variablesJson.drawPane.received["offset"] = variablesJson.drawPane["getRandomOffset"](10);
+
+        var x = variablesJson.drawPane.received["mouse"].x + variablesJson.drawPane.received["offset"].x;
+        var y = variablesJson.drawPane.received["mouse"].y + variablesJson.drawPane.received["offset"].y;
+
+        variablesJson.drawPane["tmp_ctx"].fillStyle = variablesJson.drawPane.received["choosenColor"];
+
+        variablesJson.drawPane["tmp_ctx"].fillRect(x, y, 1, 1);
+      }
+
+    }
+
+    switch (variablesJson.drawPane.received["choosenPen"]) {
+      case "pen0":
+        // Writing down to real canvas now
+        variablesJson.drawPane["ctx"].drawImage(variablesJson.drawPane["tmp_canvas"], 0, 0);
+        // Clearing tmp canvas
+        variablesJson.drawPane["tmp_ctx"].clearRect(0, 0, variablesJson.drawPane["tmp_canvas"].width, variablesJson.drawPane["tmp_canvas"].height);
+
+        variablesJson.drawPane["tmp_ctx"].beginPath();
+        variablesJson.drawPane["tmp_ctx"].moveTo(variablesJson.drawPane.received["start_mouse"].x, variablesJson.drawPane.received["start_mouse"].y);
+
+        variablesJson.drawPane["tmp_ctx"].strokeStyle = variablesJson.drawPane.received["choosenColor"];
+        variablesJson.drawPane["tmp_ctx"].lineTo(variablesJson.drawPane.received["mouse"].x, variablesJson.drawPane.received["mouse"].y);
+        variablesJson.drawPane["tmp_ctx"].stroke();
+
+        break;
+      case "pen1":
+
+        //try unsetting the intervall in case we havent correctly unset it when leaving the draw pane.
+        try {
+          clearInterval(variablesJson.drawPane.received["sprayIntervalID"]);
+        } catch (e) {
+          console.log(e);
+        }
+
+        // Writing down to real canvas now
+        variablesJson.drawPane["ctx"].drawImage(variablesJson.drawPane["tmp_canvas"], 0, 0);
+        // Clearing tmp canvas
+        variablesJson.drawPane["tmp_ctx"].clearRect(0, 0, variablesJson.drawPane["tmp_canvas"].width, variablesJson.drawPane["tmp_canvas"].height);
+
+        variablesJson.drawPane.received["generateSprayParticles"]();
+
+      //  variablesJson.drawPane.received["sprayIntervalID"] = setInterval(variablesJson.drawPane["onPaint"], 50);
+        break;
+    }
+
+  }
 
   function ConnectToWebsocketBroadcastServer() {
 
