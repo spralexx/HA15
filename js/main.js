@@ -284,10 +284,15 @@
     variablesJson.drawPane.sendable["choosenPen"] = 'pen0';
 
     var colorChooser = new PrepareColorChooser(colorchoosersize);
+
     for (var element = 3; element < (colorchoosersize * colorchoosersize) + colorchoosersize; element++) {
       var table = document.getElementById("toolsAndColors");
       var tdsInTable = table.getElementsByTagName("td");
       tdsInTable[element].setAttribute("class", "notClicked");
+      if(element==11){
+        tdsInTable[element].setAttribute("class", "clicked");
+      }
+
     }
 
     variablesJson.drawPane.sendable.userID["uuid"] = generateUUID();
