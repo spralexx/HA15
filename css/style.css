@@ -3,6 +3,7 @@ header {
 }
 #body_main {
   width: 100%;
+  overflow: hidden;
 }
 
 /*############################left menue################*/

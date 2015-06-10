@@ -42,16 +42,50 @@
 
   }
 
-  function setDrawEventListener() {
+  function setDrawEventListener(move,down,up) {
     //set event listener
 
     /* Mouse Capturing Work */
-    variablesJson.drawPane["tmp_canvas"].addEventListener('mousemove', function(e) {
+    if(move=='mousemove'){
+
+    variablesJson.drawPane["tmp_canvas"].addEventListener(move, function(e) {
+      variablesJson.drawPane.sendable["mouse"].x = typeof e.offsetX !== 'undefined' ? e.offsetX : e.layerX;
+      variablesJson.drawPane.sendable["mouse"].y = typeof e.offsetY !== 'undefined' ? e.offsetY : e.layerY;
+    //  console.log(variablesJson.drawPane.sendable["mouse"].x);
+    }, false);
+    }
+    else{
+      variablesJson.drawPane["tmp_canvas"].addEventListener(move, function(e) {
+        var elem = document.getElementById("tmp_canvas");
+        var body =document.getElementById("body_main");
+      //sendInstructions(" "+e.touches[0].pageX+"    "+elem.getBoundingClientRect().top );
+      body.webkitRequestFullscreen();
+    variablesJson.drawPane.sendable["mouse"].x = Math.round(e.touches[0].screenX-elem.getBoundingClientRect().left);
+        variablesJson.drawPane.sendable["mouse"].y = Math.round(e.touches[0].screenY-elem.getBoundingClientRect().top);
+      }, false);
+
+    }
+
+    if(down=='mousedown'){
+
+    variablesJson.drawPane["tmp_canvas"].addEventListener('mousedown', function(e) {
       variablesJson.drawPane.sendable["mouse"].x = typeof e.offsetX !== 'undefined' ? e.offsetX : e.layerX;
       variablesJson.drawPane.sendable["mouse"].y = typeof e.offsetY !== 'undefined' ? e.offsetY : e.layerY;
     }, false);
+    }
+    else{
+      variablesJson.drawPane["tmp_canvas"].addEventListener('touchstart', function(e) {
+        var elem = document.getElementById("tmp_canvas");
+        var body =document.getElementById("body_main");
+      //sendInstructions(" "+e.touches[0].pageX+"    "+elem.getBoundingClientRect().top );
+      body.webkitRequestFullscreen();
+    variablesJson.drawPane.sendable["mouse"].x = Math.round(e.touches[0].screenX-elem.getBoundingClientRect().left);
+        variablesJson.drawPane.sendable["mouse"].y = Math.round(e.touches[0].screenY-elem.getBoundingClientRect().top);
+      }, false);
 
-    variablesJson.drawPane["tmp_canvas"].addEventListener('mousedown', function(e) {
+    }
+
+    variablesJson.drawPane["tmp_canvas"].addEventListener(down, function(e) {
       switch (variablesJson.drawPane.sendable["choosenPen"]) {
         case "pen0":
           // Writing down to real canvas now
@@ -60,10 +94,11 @@
           variablesJson.drawPane["tmp_ctx"].clearRect(0, 0, variablesJson.drawPane["tmp_canvas"].width, variablesJson.drawPane["tmp_canvas"].height);
           variablesJson.drawPane["tmp_ctx"].strokeStyle = variablesJson.drawPane.sendable["choosenColor"];
           variablesJson.drawPane["tmp_ctx"].beginPath();
+
           variablesJson.drawPane.sendable["start_mouse"].x = variablesJson.drawPane.sendable["mouse"].x;
           variablesJson.drawPane.sendable["start_mouse"].y = variablesJson.drawPane.sendable["mouse"].y;
           variablesJson.drawPane["tmp_ctx"].moveTo(variablesJson.drawPane.sendable["mouse"].x, variablesJson.drawPane.sendable["mouse"].y);
-          variablesJson.drawPane["tmp_canvas"].addEventListener('mousemove', variablesJson.drawPane["onPaint"], false);
+          variablesJson.drawPane["tmp_canvas"].addEventListener(move, variablesJson.drawPane["onPaint"], false);
           break;
         case "pen1":
 
@@ -79,10 +114,9 @@
           // Clearing tmp canvas
           variablesJson.drawPane["tmp_ctx"].clearRect(0, 0, variablesJson.drawPane["tmp_canvas"].width, variablesJson.drawPane["tmp_canvas"].height);
 
-          variablesJson.drawPane["tmp_canvas"].addEventListener('mousemove', variablesJson.drawPane["onPaint"], false);
+          variablesJson.drawPane["tmp_canvas"].addEventListener(move, variablesJson.drawPane["onPaint"], false);
 
-          variablesJson.drawPane.sendable["mouse"].x = typeof e.offsetX !== 'undefined' ? e.offsetX : e.layerX;
-          variablesJson.drawPane.sendable["mouse"].y = typeof e.offsetY !== 'undefined' ? e.offsetY : e.layerY;
+
 
           variablesJson.drawPane.sendable["start_mouse"].x = variablesJson.drawPane.sendable["mouse"].x;
           variablesJson.drawPane.sendable["start_mouse"].y = variablesJson.drawPane.sendable["mouse"].y;
@@ -96,14 +130,16 @@
 
     }, false);
 
-    variablesJson.drawPane["tmp_canvas"].addEventListener('mouseup', function() {
+    variablesJson.drawPane["tmp_canvas"].addEventListener(up, function() {
       //console.log("mouseup");
       switch (variablesJson.drawPane.sendable["choosenPen"]) {
         case "pen0":
+          variablesJson.drawPane["tmp_canvas"].removeEventListener('touchmove', variablesJson.drawPane["onPaint"], false);
           variablesJson.drawPane["tmp_canvas"].removeEventListener('mousemove', variablesJson.drawPane["onPaint"], false);
           break;
         case "pen1":
           variablesJson.drawPane["tmp_canvas"].removeEventListener('mousemove', variablesJson.drawPane["onPaint"], false);
+          variablesJson.drawPane["tmp_canvas"].removeEventListener('touchmove', variablesJson.drawPane["onPaint"], false);
           clearInterval(variablesJson.drawPane.sendable["sprayIntervalID"]);
           break;
       }
@@ -170,22 +206,23 @@
 
   function sendInstructions(x) {
     var stringToSend = x;
+    //console.log(variablesJson);
     while (stringToSend.length != 0) {
       //  console.log(stringToSend);
       //console.log(variablesJson);
       if (ws.readyState == 1) {
         //console.log(JSON.stringify(variablesJson.drawPane.sendable).length);
-        ws.send(stringToSend.substring(0, 200));
-        console.log("String sent: " + stringToSend.substring(0, 200));
-        console.log("get canvas?: "+variablesJson.drawPane.sendable.clientInfo["requestCanvas"]);
-        stringToSend = stringToSend.substring(200, stringToSend.length);
+        ws.send(variablesJson.drawPane.sendable.clientInfo["uuid"] + stringToSend.substring(0, 164));
+        console.log("String sent: uuid: " + variablesJson.drawPane.sendable.clientInfo["uuid"] + stringToSend.substring(0, 164));
+        console.log("get canvas?: " + variablesJson.drawPane.sendable.clientInfo["requestCanvas"]);
+        stringToSend = stringToSend.substring(164, stringToSend.length);
       } else {
         //console.log("##############ws has been closed. reconnecting...");
         ws = new ConnectToWebsocketBroadcastServer();
         ws.onopen = function() {
           this.send("gibUrlUndPort");
-          this.send(stringToSend.substring(0, 200));
-          stringToSend = stringToSend.substring(200, stringToSend.length);
+          this.send(variablesJson.drawPane.sendable.clientInfo["uuid"] + stringToSend.substring(0, 164));
+          stringToSend = stringToSend.substring(164, stringToSend.length);
         }
       }
     }
@@ -270,7 +307,8 @@
 
     initDrawPane();
     //set defaults for initDrawPane()
-    setDrawEventListener();
+    setDrawEventListener('mousemove','mousedown','mouseup');
+    setDrawEventListener('touchmove','touchstart','touchend');
 
     /* Drawing on Paint App */
     variablesJson.drawPane["tmp_ctx"].lineWidth = 5;
@@ -304,58 +342,83 @@
     //console.log(variablesJson);
     //console.log(variablesJson);
 
-  websocketConnectionManager();
+    webSocketOnMessageManager();
     setConnectToGroupButton();
 
   }
 
-  function websocketConnectionManager(){
+  function webSocketOnMessageManager() {
+    var senderUuid = '';
     var storeSplittedMessage = '';
+    var firstCanvasSenderUuid = '';
+    var messagesByUuid = {
+      "messages": {
+
+      }
+    };
     ws = new ConnectToWebsocketBroadcastServer();
 
     ws.onmessage = function(e) {
-      //console.log(e.data);
-      console.log(storeSplittedMessage);
+      console.log(e.data);
+      //console.log(storeSplittedMessage);
       if (e.data.substring(0, 3) == "+++") {
         //    console.log(e.data);
       } else {
         try {
-          var receivedJSON = JSON.parse(storeSplittedMessage + e.data)
-          variablesJson.drawPane.received = receivedJSON;
-          console.log(receivedJSON);
+          senderUuid = e.data.substring(0, 36);
+          if (messagesByUuid.messages.hasOwnProperty(senderUuid)) {
+            messagesByUuid.messages[senderUuid] = messagesByUuid.messages[senderUuid] + e.data.substring(36, e.data.length);
+            //console.log(JSON.parse(messagesByUuid.messages[senderUuid]));
+              var receivedJSON = JSON.parse(messagesByUuid.messages[senderUuid]);
+            console.log(receivedJSON.clientInfo);
+            //  console.log(variablesJson.drawPane.sendable.clientInfo["groupName"]);
+            //messagesByUuid.messages[senderUuid] = '';
+            if (receivedJSON.clientInfo["groupName"] == variablesJson.drawPane.sendable.clientInfo["groupName"]) {
+              variablesJson.drawPane["received"] = receivedJSON;
+              console.log(variablesJson.drawPane["received"]);
 
-          if ((variablesJson.drawPane.received.clientInfo["groupName"] == variablesJson.drawPane.sendable.clientInfo["groupName"]) && (variablesJson.drawPane.received.clientInfo["requestCanvas"] == true)) {
-            //send our hole canvas to new joining member of our group
+              if ((variablesJson.drawPane.received.clientInfo["groupName"] == variablesJson.drawPane.sendable.clientInfo["groupName"]) && (variablesJson.drawPane.received.clientInfo["requestCanvas"] == true)) {
+                //send our hole canvas to new joining member of our group
+                console.log("send our hole canvas###############");
+                //console.log(variablesJson.drawPane["canvas"].toDataURL());
+                variablesJson.drawPane.sendable["canvasDataUrl"] = variablesJson.drawPane["canvas"].toDataURL();
+                variablesJson.drawPane.sendable.clientInfo["requestCanvas"] = false; //set to false so other clients wont send their hole canvas back to us. (loop prevention)
+                sendInstructions(JSON.stringify(variablesJson.drawPane.sendable));
+                variablesJson.drawPane.sendable["canvasDataUrl"] = ''; //delete canvas data url from sendable so we only send it once
+                //  console.log("achtuuuuuuung: ");
+                //  console.log(variablesJson.drawPane.sendable);
 
-            console.log(variablesJson.drawPane["canvas"].toDataURL());
-            variablesJson.drawPane.sendable["canvasDataUrl"] = variablesJson.drawPane["canvas"].toDataURL();
-            variablesJson.drawPane.sendable.clientInfo["requestCanvas"] = false; //set to false so other clients wont send their hole canvas back to us. (loop prevention)
-            sendInstructions(JSON.stringify(variablesJson.drawPane.sendable));
-            variablesJson.drawPane.sendable["canvasDataUrl"]=''; //delete canvas data url from sendable so we only send it once
-            console.log("achtuuuuuuung: ");
-            console.log(variablesJson.drawPane.sendable);
+              }
+              if ((variablesJson.drawPane.received.clientInfo["groupName"] == variablesJson.drawPane.sendable.clientInfo["groupName"]) && (variablesJson.drawPane.sendable.clientInfo["requestCanvas"] == true) && variablesJson.drawPane.received.hasOwnProperty("canvasDataUrl")) {
+                //if we requested the hole canvas from other clients of our new group draw received results
+                //console.log("test before writing canvas");
+                //console.log(variablesJson.drawPane.received["canvasDataUrl"]);
+                var image = new Image();
+                image.src = variablesJson.drawPane.received["canvasDataUrl"];
+                variablesJson.drawPane["ctx"].drawImage(image, 0, 0);
+                variablesJson.drawPane.sendable.clientInfo["requestCanvas"] = false; //now we have the hole canvas. ne need to request it every time on send.
+                variablesJson.drawPane.sendable["canvasDataUrl"] = ''; //delete canvas data url from sendable so we only send it once
 
-          }
-          if ((variablesJson.drawPane.received.clientInfo["groupName"] == variablesJson.drawPane.sendable.clientInfo["groupName"]) && (variablesJson.drawPane.sendable.clientInfo["requestCanvas"] == true) && variablesJson.drawPane.received.hasOwnProperty("canvasDataUrl")) {
-            //if we requested the hole canvas from other clients of our new group draw received results
-            console.log("test before writing canvas");
-            console.log(variablesJson.drawPane.received["canvasDataUrl"]);
-            var image = new Image();
-            image.src=variablesJson.drawPane.received["canvasDataUrl"];
-            variablesJson.drawPane["ctx"].drawImage(image, 0, 0);
-            variablesJson.drawPane.sendable.clientInfo["requestCanvas"] = false; //now we have the hole canvas. ne need to request it every time on send.
-            variablesJson.drawPane.sendable["canvasDataUrl"]=''; //delete canvas data url from sendable so we only send it once
+              } else {
+                if (variablesJson.drawPane.received.clientInfo["groupName"] == variablesJson.drawPane.sendable.clientInfo["groupName"]) {
+                  drawReceived();
+                }
+              }
+              console.log(messagesByUuid.messages.hasOwnProperty(senderUuid));
+              delete messagesByUuid.messages[senderUuid];
+
+            } else {
+                delete messagesByUuid.messages[senderUuid];
+            }
 
           } else {
-            if (variablesJson.drawPane.received.clientInfo["groupName"] == variablesJson.drawPane.sendable.clientInfo["groupName"]) {
-              drawReceived();
-            }
+            messagesByUuid.messages[senderUuid] = e.data.substring(36, e.data.length);
           }
-          storeSplittedMessage = '';
+
         } catch (err) {
-          storeSplittedMessage = storeSplittedMessage + e.data;
+          storeSplittedMessage = storeSplittedMessage + e.data.substring(36, e.data.length);
           //console.log(storeSplittedMessage);
-          console.log("ERROR!!: " + err.message);
+          console.log("ERROR!!: " + err.message+'  '+ err.prototype.lineNumber);
         }
       }
     }
@@ -461,8 +524,8 @@
 
     //init connection to websocket broadcast server
     try {
-      //this.websocketConnection = new WebSocket("ws://mediengeil.org:8080");
       this.websocketConnection = new WebSocket("ws://mediengeil.org:8080");
+      //this.websocketConnection = new WebSocket("ws://localhost.org:8080");
 
       this.websocketConnection.onopen = function() {
         //console.log(this.readyState);
