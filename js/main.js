@@ -325,13 +325,13 @@
         }
       }
     };
-    handleGroupConnect();
+    setConnectToGroupButton();
 
   }
 
-  function handleGroupConnect() {
+  function setConnectToGroupButton() {
     var groupConnectButton = document.getElementById("groupConnectButton");
-    groupConnectButton.addEventListener('click', function test(e) {
+    groupConnectButton.addEventListener('click', function connect(e) {
       e.preventDefault();
       variablesJson.drawPane.sendable["groupName"] = document.getElementById("groupName").value;
       console.log("Gruppenname: " + variablesJson.drawPane.sendable["groupName"]);
@@ -339,18 +339,22 @@
       var text=document.createTextNode(variablesJson.drawPane.sendable["groupName"]);
       groupNameInHtml.appendChild(text);
       document.getElementById("group-input-form").appendChild(groupNameInHtml);
-      groupConnectButton.removeEventListener('click', test, false);
+      groupConnectButton.removeEventListener('click', connect, false);
       groupConnectButton.value = "Von Gruppe trennen";
-      groupConnectButton.addEventListener('click', function(e) {
-        e.preventDefault();
-        document.getElementById("group-input-form").removeChild(groupNameInHtml);
-        groupConnectButton.value="Mit Gruppe verbinden";
-        variablesJson.drawPane.sendable["groupName"]=generateUUID(); //beacause a uuid is as its name says universal unique no other client will have the same groupname so no draw instructions that will be received will be shown
-        handleGroupConnect();
-      },false);
-
+      setDisconnectFromGroupButton();
     }, false);
 
+  }
+
+  function setDisconnectFromGroupButton(){
+    groupConnectButton.addEventListener('click', function disconnect(e) {
+      e.preventDefault();
+      document.getElementById("group-input-form").removeChild(document.getElementById("group-input-form").lastChild);
+      groupConnectButton.value="Mit Gruppe verbinden";
+      variablesJson.drawPane.sendable["groupName"]=generateUUID(); //beacause a uuid is as its name says universal unique no other client will have the same groupname so no draw instructions that will be received will be shown
+      groupConnectButton.removeEventListener('click', disconnect, false);
+      setConnectToGroupButton()
+    },false);
   }
 
   function drawReceived() {
