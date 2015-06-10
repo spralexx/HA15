@@ -3,11 +3,10 @@
   var variablesJson = {
     "drawPane": {
       "sendable": {
-        "userID": {}
+        "clientInfo": {}
       },
       "received": {}
     },
-    "userID": {}
   };
 
   var ws;
@@ -111,7 +110,7 @@
     }, false);
 
     variablesJson.drawPane["onPaint"] = function() {
-      sendDrawInstructions();
+      sendInstructions(JSON.stringify(variablesJson.drawPane.sendable));
 
       switch (variablesJson.drawPane.sendable["choosenPen"]) {
         case "pen0":
@@ -169,8 +168,8 @@
 
   }
 
-  function sendDrawInstructions() {
-    var stringToSend = JSON.stringify(variablesJson.drawPane.sendable);
+  function sendInstructions(x) {
+    var stringToSend = x;
     while (stringToSend.length != 0) {
       //  console.log(stringToSend);
       //console.log(variablesJson);
@@ -295,10 +294,11 @@
 
     }
 
-    variablesJson.drawPane.sendable.userID["uuid"] = generateUUID();
-    variablesJson.drawPane.sendable["groupName"]=generateUUID();
+    variablesJson.drawPane.sendable.clientInfo["uuid"] = generateUUID();
+    variablesJson.drawPane.sendable.clientInfo["groupName"] = generateUUID();
+    variablesJson.drawPane.sendable.clientInfo["requestCanvas"] = false;
     //console.log("init done:");
-    //console.log(JSON.stringify(variablesJson.userID));
+    //console.log(JSON.stringify(variablesJson.clientInfo));
     //console.log(JSON.stringify(variablesJson.drawPane.sendable));
     //console.log(variablesJson);
     //console.log(variablesJson);
@@ -307,21 +307,40 @@
     ws = new ConnectToWebsocketBroadcastServer();
 
     ws.onmessage = function(e) {
-      console.log(e.data);
+      //console.log(e.data);
+      console.log(storeSplittedMessage);
       if (e.data.substring(0, 3) == "+++") {
         //    console.log(e.data);
       } else {
         try {
           var receivedJSON = JSON.parse(storeSplittedMessage + e.data)
           variablesJson.drawPane.received = receivedJSON;
-          if (variablesJson.drawPane.received["groupName"] == variablesJson.drawPane.sendable["groupName"]) {
-            drawReceived();
+          console.log(receivedJSON);
+
+          if ((variablesJson.drawPane.received.clientInfo["groupName"] == variablesJson.drawPane.sendable.clientInfo["groupName"]) && (variablesJson.drawPane.received.clientInfo["requestCanvas"] == true)) {
+            console.log(variablesJson.drawPane["canvas"].toDataURL());
+            variablesJson.drawPane.sendable["canvasDataUrl"] = variablesJson.drawPane["canvas"].toDataURL();
+            variablesJson.drawPane.sendable.clientInfo["requestCanvas"] = false;
+            sendInstructions(JSON.stringify(variablesJson.drawPane.sendable));
+            delete variablesJson.drawPane.sendable["canvasDataUrl"];
+          }
+          if ((variablesJson.drawPane.received.clientInfo["groupName"] == variablesJson.drawPane.sendable.clientInfo["groupName"]) && (variablesJson.drawPane.sendable.clientInfo["requestCanvas"] == true) && variablesJson.drawPane.received.hasOwnProperty("canvasDataUrl")) {
+            console.log("test before writing canvas");
+            console.log(variablesJson.drawPane.received["canvasDataUrl"]);
+            var image = new Image();
+            image.src=variablesJson.drawPane.received["canvasDataUrl"];
+            variablesJson.drawPane["ctx"].drawImage(image, 0, 0);
+            variablesJson.drawPane.sendable.clientInfo["requestCanvas"] == false;
+          } else {
+            if (variablesJson.drawPane.received.clientInfo["groupName"] == variablesJson.drawPane.sendable.clientInfo["groupName"]) {
+              drawReceived();
+            }
           }
           storeSplittedMessage = '';
         } catch (err) {
           storeSplittedMessage = storeSplittedMessage + e.data;
           //console.log(storeSplittedMessage);
-          //console.log("ERROR!!: " + err.message);
+          console.log("ERROR!!: " + err.message);
         }
       }
     };
@@ -332,11 +351,13 @@
   function setConnectToGroupButton() {
     var groupConnectButton = document.getElementById("groupConnectButton");
     groupConnectButton.addEventListener('click', function connect(e) {
+      variablesJson.drawPane.sendable.clientInfo["groupName"] = document.getElementById("groupName").value;
+      variablesJson.drawPane.sendable.clientInfo["requestCanvas"] = true;
+      getCanvasFromOtherClients();
       e.preventDefault();
-      variablesJson.drawPane.sendable["groupName"] = document.getElementById("groupName").value;
-      console.log("Gruppenname: " + variablesJson.drawPane.sendable["groupName"]);
-      var groupNameInHtml=document.createElement("P");
-      var text=document.createTextNode(variablesJson.drawPane.sendable["groupName"]);
+      console.log("Gruppenname: " + variablesJson.drawPane.sendable.clientInfo["groupName"]);
+      var groupNameInHtml = document.createElement("P");
+      var text = document.createTextNode(variablesJson.drawPane.sendable.clientInfo["groupName"]);
       groupNameInHtml.appendChild(text);
       document.getElementById("group-input-form").appendChild(groupNameInHtml);
       groupConnectButton.removeEventListener('click', connect, false);
@@ -346,15 +367,20 @@
 
   }
 
-  function setDisconnectFromGroupButton(){
+  function getCanvasFromOtherClients() {
+    console.log(JSON.stringify(variablesJson.drawPane.sendable));
+    sendInstructions(JSON.stringify(variablesJson.drawPane.sendable));
+  }
+
+  function setDisconnectFromGroupButton() {
     groupConnectButton.addEventListener('click', function disconnect(e) {
       e.preventDefault();
       document.getElementById("group-input-form").removeChild(document.getElementById("group-input-form").lastChild);
-      groupConnectButton.value="Mit Gruppe verbinden";
-      variablesJson.drawPane.sendable["groupName"]=generateUUID(); //beacause a uuid is as its name says universal unique no other client will have the same groupname so no draw instructions that will be received will be shown
+      groupConnectButton.value = "Mit Gruppe verbinden";
+      variablesJson.drawPane.sendable.clientInfo["groupName"] = generateUUID(); //beacause a uuid is as its name says universal unique no other client will have the same groupname so no draw instructions that will be received will be shown
       groupConnectButton.removeEventListener('click', disconnect, false);
       setConnectToGroupButton()
-    },false);
+    }, false);
   }
 
   function drawReceived() {
@@ -421,7 +447,8 @@
 
     //init connection to websocket broadcast server
     try {
-      this.websocketConnection = new WebSocket("ws://mediengeil.org:8080");
+      //this.websocketConnection = new WebSocket("ws://mediengeil.org:8080");
+      this.websocketConnection = new WebSocket("ws://localhost:8080");
 
       this.websocketConnection.onopen = function() {
         //console.log(this.readyState);
