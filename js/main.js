@@ -177,6 +177,7 @@
         //console.log(JSON.stringify(variablesJson.drawPane.sendable).length);
         ws.send(stringToSend.substring(0, 200));
         console.log("String sent: " + stringToSend.substring(0, 200));
+        console.log("get canvas?: "+variablesJson.drawPane.sendable.clientInfo["requestCanvas"]);
         stringToSend = stringToSend.substring(200, stringToSend.length);
       } else {
         //console.log("##############ws has been closed. reconnecting...");
@@ -303,6 +304,12 @@
     //console.log(variablesJson);
     //console.log(variablesJson);
 
+  websocketConnectionManager();
+    setConnectToGroupButton();
+
+  }
+
+  function websocketConnectionManager(){
     var storeSplittedMessage = '';
     ws = new ConnectToWebsocketBroadcastServer();
 
@@ -318,19 +325,27 @@
           console.log(receivedJSON);
 
           if ((variablesJson.drawPane.received.clientInfo["groupName"] == variablesJson.drawPane.sendable.clientInfo["groupName"]) && (variablesJson.drawPane.received.clientInfo["requestCanvas"] == true)) {
+            //send our hole canvas to new joining member of our group
+
             console.log(variablesJson.drawPane["canvas"].toDataURL());
             variablesJson.drawPane.sendable["canvasDataUrl"] = variablesJson.drawPane["canvas"].toDataURL();
-            variablesJson.drawPane.sendable.clientInfo["requestCanvas"] = false;
+            variablesJson.drawPane.sendable.clientInfo["requestCanvas"] = false; //set to false so other clients wont send their hole canvas back to us. (loop prevention)
             sendInstructions(JSON.stringify(variablesJson.drawPane.sendable));
-            delete variablesJson.drawPane.sendable["canvasDataUrl"];
+            variablesJson.drawPane.sendable["canvasDataUrl"]=''; //delete canvas data url from sendable so we only send it once
+            console.log("achtuuuuuuung: ");
+            console.log(variablesJson.drawPane.sendable);
+
           }
           if ((variablesJson.drawPane.received.clientInfo["groupName"] == variablesJson.drawPane.sendable.clientInfo["groupName"]) && (variablesJson.drawPane.sendable.clientInfo["requestCanvas"] == true) && variablesJson.drawPane.received.hasOwnProperty("canvasDataUrl")) {
+            //if we requested the hole canvas from other clients of our new group draw received results
             console.log("test before writing canvas");
             console.log(variablesJson.drawPane.received["canvasDataUrl"]);
             var image = new Image();
             image.src=variablesJson.drawPane.received["canvasDataUrl"];
             variablesJson.drawPane["ctx"].drawImage(image, 0, 0);
-            variablesJson.drawPane.sendable.clientInfo["requestCanvas"] == false;
+            variablesJson.drawPane.sendable.clientInfo["requestCanvas"] = false; //now we have the hole canvas. ne need to request it every time on send.
+            variablesJson.drawPane.sendable["canvasDataUrl"]=''; //delete canvas data url from sendable so we only send it once
+
           } else {
             if (variablesJson.drawPane.received.clientInfo["groupName"] == variablesJson.drawPane.sendable.clientInfo["groupName"]) {
               drawReceived();
@@ -343,9 +358,7 @@
           console.log("ERROR!!: " + err.message);
         }
       }
-    };
-    setConnectToGroupButton();
-
+    }
   }
 
   function setConnectToGroupButton() {
@@ -354,6 +367,7 @@
       variablesJson.drawPane.sendable.clientInfo["groupName"] = document.getElementById("groupName").value;
       variablesJson.drawPane.sendable.clientInfo["requestCanvas"] = true;
       getCanvasFromOtherClients();
+      //variablesJson.drawPane.sendable.clientInfo["requestCanvas"]=false; //cant set it to false here because in ws.onmessage case to paint would be wrong
       e.preventDefault();
       console.log("Gruppenname: " + variablesJson.drawPane.sendable.clientInfo["groupName"]);
       var groupNameInHtml = document.createElement("P");
@@ -448,7 +462,7 @@
     //init connection to websocket broadcast server
     try {
       //this.websocketConnection = new WebSocket("ws://mediengeil.org:8080");
-      this.websocketConnection = new WebSocket("ws://localhost:8080");
+      this.websocketConnection = new WebSocket("ws://mediengeil.org:8080");
 
       this.websocketConnection.onopen = function() {
         //console.log(this.readyState);
