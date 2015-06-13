@@ -42,45 +42,43 @@
 
   }
 
-  function setDrawEventListener(move,down,up) {
+  function setDrawEventListener(move, down, up) {
     //set event listener
 
     /* Mouse Capturing Work */
-    if(move=='mousemove'){
+    if (move == 'mousemove') {
 
-    variablesJson.drawPane["tmp_canvas"].addEventListener(move, function(e) {
-      variablesJson.drawPane.sendable["mouse"].x = typeof e.offsetX !== 'undefined' ? e.offsetX : e.layerX;
-      variablesJson.drawPane.sendable["mouse"].y = typeof e.offsetY !== 'undefined' ? e.offsetY : e.layerY;
-    //  console.log(variablesJson.drawPane.sendable["mouse"].x);
-    }, false);
-    }
-    else{
+      variablesJson.drawPane["tmp_canvas"].addEventListener(move, function(e) {
+        variablesJson.drawPane.sendable["mouse"].x = typeof e.offsetX !== 'undefined' ? e.offsetX : e.layerX;
+        variablesJson.drawPane.sendable["mouse"].y = typeof e.offsetY !== 'undefined' ? e.offsetY : e.layerY;
+        //  console.log(variablesJson.drawPane.sendable["mouse"].x);
+      }, false);
+    } else {
       variablesJson.drawPane["tmp_canvas"].addEventListener(move, function(e) {
         var elem = document.getElementById("tmp_canvas");
-        var body =document.getElementById("body_main");
-      //sendInstructions(" "+e.touches[0].pageX+"    "+elem.getBoundingClientRect().top );
-      body.webkitRequestFullscreen();
-    variablesJson.drawPane.sendable["mouse"].x = Math.round(e.touches[0].screenX-elem.getBoundingClientRect().left);
-        variablesJson.drawPane.sendable["mouse"].y = Math.round(e.touches[0].screenY-elem.getBoundingClientRect().top);
+        var body = document.getElementById("body_main");
+        //sendInstructions(" "+e.touches[0].pageX+"    "+elem.getBoundingClientRect().top );
+        //body.webkitRequestFullscreen();
+        variablesJson.drawPane.sendable["mouse"].x = Math.round(e.touches[0].screenX - elem.getBoundingClientRect().left);
+        variablesJson.drawPane.sendable["mouse"].y = Math.round(e.touches[0].screenY - elem.getBoundingClientRect().top);
       }, false);
 
     }
 
-    if(down=='mousedown'){
+    if (down == 'mousedown') {
 
-    variablesJson.drawPane["tmp_canvas"].addEventListener('mousedown', function(e) {
-      variablesJson.drawPane.sendable["mouse"].x = typeof e.offsetX !== 'undefined' ? e.offsetX : e.layerX;
-      variablesJson.drawPane.sendable["mouse"].y = typeof e.offsetY !== 'undefined' ? e.offsetY : e.layerY;
-    }, false);
-    }
-    else{
+      variablesJson.drawPane["tmp_canvas"].addEventListener('mousedown', function(e) {
+        variablesJson.drawPane.sendable["mouse"].x = typeof e.offsetX !== 'undefined' ? e.offsetX : e.layerX;
+        variablesJson.drawPane.sendable["mouse"].y = typeof e.offsetY !== 'undefined' ? e.offsetY : e.layerY;
+      }, false);
+    } else {
       variablesJson.drawPane["tmp_canvas"].addEventListener('touchstart', function(e) {
         var elem = document.getElementById("tmp_canvas");
-        var body =document.getElementById("body_main");
-      //sendInstructions(" "+e.touches[0].pageX+"    "+elem.getBoundingClientRect().top );
-      body.webkitRequestFullscreen();
-    variablesJson.drawPane.sendable["mouse"].x = Math.round(e.touches[0].screenX-elem.getBoundingClientRect().left);
-        variablesJson.drawPane.sendable["mouse"].y = Math.round(e.touches[0].screenY-elem.getBoundingClientRect().top);
+        var body = document.getElementById("body_main");
+        //sendInstructions(" "+e.touches[0].pageX+"    "+elem.getBoundingClientRect().top );
+        //  body.webkitRequestFullscreen();
+        variablesJson.drawPane.sendable["mouse"].x = Math.round(e.touches[0].screenX - elem.getBoundingClientRect().left);
+        variablesJson.drawPane.sendable["mouse"].y = Math.round(e.touches[0].screenY - elem.getBoundingClientRect().top);
       }, false);
 
     }
@@ -307,8 +305,8 @@
 
     initDrawPane();
     //set defaults for initDrawPane()
-    setDrawEventListener('mousemove','mousedown','mouseup');
-    setDrawEventListener('touchmove','touchstart','touchend');
+    setDrawEventListener('mousemove', 'mousedown', 'mouseup');
+    setDrawEventListener('touchmove', 'touchstart', 'touchend');
 
     /* Drawing on Paint App */
     variablesJson.drawPane["tmp_ctx"].lineWidth = 5;
@@ -344,7 +342,31 @@
 
     webSocketOnMessageManager();
     setConnectToGroupButton();
+    var undoButton = document.getElementById("undo_button");
+    undoButton.addEventListener('click', function(e) {
+      e.preventDefault();
+      undoLast();
+    }, false);
 
+
+  }
+
+  function undoLast() {
+    //send our hole canvas to group members so everywhere our last changes would be overwritten
+    console.log("send our hole canvas###############");
+    //console.log(variablesJson.drawPane["canvas"].toDataURL());
+    variablesJson.drawPane.sendable["canvasDataUrl"] = variablesJson.drawPane["canvas"].toDataURL();
+    variablesJson.drawPane.sendable.clientInfo["requestCanvas"] = false; //set to false so other clients wont send their hole canvas back to us. (loop prevention)
+    variablesJson.drawPane.sendable["undoLast"]=true;
+    sendInstructions(JSON.stringify(variablesJson.drawPane.sendable));
+    variablesJson.drawPane.sendable["canvasDataUrl"] = ''; //delete canvas data url from sendable so we only send it once
+    variablesJson.drawPane.sendable["undoLast"]=false;
+    //  console.log("achtuuuuuuung: ");
+    //  console.log(variablesJson.drawPane.sendable);
+
+
+
+    variablesJson.drawPane["tmp_ctx"].clearRect(0, 0, variablesJson.drawPane["tmp_canvas"].width, variablesJson.drawPane["tmp_canvas"].height);
   }
 
   function webSocketOnMessageManager() {
@@ -369,7 +391,7 @@
           if (messagesByUuid.messages.hasOwnProperty(senderUuid)) {
             messagesByUuid.messages[senderUuid] = messagesByUuid.messages[senderUuid] + e.data.substring(36, e.data.length);
             //console.log(JSON.parse(messagesByUuid.messages[senderUuid]));
-              var receivedJSON = JSON.parse(messagesByUuid.messages[senderUuid]);
+            var receivedJSON = JSON.parse(messagesByUuid.messages[senderUuid]);
             console.log(receivedJSON.clientInfo);
             //  console.log(variablesJson.drawPane.sendable.clientInfo["groupName"]);
             //messagesByUuid.messages[senderUuid] = '';
@@ -400,15 +422,28 @@
                 variablesJson.drawPane.sendable["canvasDataUrl"] = ''; //delete canvas data url from sendable so we only send it once
 
               } else {
-                if (variablesJson.drawPane.received.clientInfo["groupName"] == variablesJson.drawPane.sendable.clientInfo["groupName"]) {
-                  drawReceived();
+                if ((variablesJson.drawPane.received.clientInfo["groupName"] == variablesJson.drawPane.sendable.clientInfo["groupName"]) && (variablesJson.drawPane.received["undoLast"]==true) && variablesJson.drawPane.received.hasOwnProperty("canvasDataUrl")) {
+                  //if we requested the hole canvas from other clients of our new group draw received results
+                  //console.log("test before writing canvas");
+                  //console.log(variablesJson.drawPane.received["canvasDataUrl"]);
+                  clearDrawPane();
+                  var image = new Image();
+                  image.src = variablesJson.drawPane.received["canvasDataUrl"];
+                  variablesJson.drawPane["ctx"].drawImage(image, 0, 0);
+                  variablesJson.drawPane.sendable.clientInfo["requestCanvas"] = false; //now we have the hole canvas. ne need to request it every time on send.
+                  variablesJson.drawPane.sendable["canvasDataUrl"] = ''; //delete canvas data url from sendable so we only send it once
+
+                } else {
+                  if (variablesJson.drawPane.received.clientInfo["groupName"] == variablesJson.drawPane.sendable.clientInfo["groupName"]) {
+                    drawReceived();
+                  }
                 }
               }
               console.log(messagesByUuid.messages.hasOwnProperty(senderUuid));
               delete messagesByUuid.messages[senderUuid];
 
             } else {
-                delete messagesByUuid.messages[senderUuid];
+              delete messagesByUuid.messages[senderUuid];
             }
 
           } else {
@@ -418,10 +453,17 @@
         } catch (err) {
           storeSplittedMessage = storeSplittedMessage + e.data.substring(36, e.data.length);
           //console.log(storeSplittedMessage);
-          console.log("ERROR!!: " + err.message+'  '+ err.prototype.lineNumber);
+          console.log("ERROR!!: " + err.message); //this error will mostlikely show "unexpected end of input" beacause of that 200 charecters limit on serverside
         }
       }
     }
+  }
+
+  function clearDrawPane(){
+    //implement removal of all already drawn stuff here
+
+    variablesJson.drawPane["tmp_ctx"].clearRect(0, 0, variablesJson.drawPane["tmp_canvas"].width, variablesJson.drawPane["tmp_canvas"].height);
+    variablesJson.drawPane["ctx"].clearRect(0, 0, variablesJson.drawPane["tmp_canvas"].width, variablesJson.drawPane["tmp_canvas"].height);
   }
 
   function setConnectToGroupButton() {
@@ -524,8 +566,9 @@
 
     //init connection to websocket broadcast server
     try {
-      this.websocketConnection = new WebSocket("ws://mediengeil.org:8080");
+      //this.websocketConnection = new WebSocket("ws://mediengeil.org:8080");
       //this.websocketConnection = new WebSocket("ws://localhost.org:8080");
+      this.websocketConnection = new WebSocket("ws://192.168.2.104:8080");
 
       this.websocketConnection.onopen = function() {
         //console.log(this.readyState);
