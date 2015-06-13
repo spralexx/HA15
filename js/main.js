@@ -39,6 +39,9 @@
     variablesJson.drawPane.sendable["offset"] = '';
     variablesJson.drawPane.sendable["choosenPen"] = '';
 
+    //clear main canvas so the downloaded picture dont has a black background...
+    variablesJson.drawPane["ctx"].fillStyle="white";
+    variablesJson.drawPane["ctx"].fillRect(0, 0, variablesJson.drawPane["tmp_canvas"].width, variablesJson.drawPane["tmp_canvas"].height);
 
   }
 
@@ -59,8 +62,8 @@
         var body = document.getElementById("body_main");
         //sendInstructions(" "+e.touches[0].pageX+"    "+elem.getBoundingClientRect().top );
         //body.webkitRequestFullscreen();
-        variablesJson.drawPane.sendable["mouse"].x = Math.round(e.touches[0].screenX - elem.getBoundingClientRect().left);
-        variablesJson.drawPane.sendable["mouse"].y = Math.round(e.touches[0].screenY - elem.getBoundingClientRect().top);
+        variablesJson.drawPane.sendable["mouse"].x = Math.round(e.touches[0].pageX - elem.getBoundingClientRect().left);
+        variablesJson.drawPane.sendable["mouse"].y = Math.round(e.touches[0].pageY - elem.getBoundingClientRect().top);
       }, false);
 
     }
@@ -77,8 +80,8 @@
         var body = document.getElementById("body_main");
         //sendInstructions(" "+e.touches[0].pageX+"    "+elem.getBoundingClientRect().top );
         //  body.webkitRequestFullscreen();
-        variablesJson.drawPane.sendable["mouse"].x = Math.round(e.touches[0].screenX - elem.getBoundingClientRect().left);
-        variablesJson.drawPane.sendable["mouse"].y = Math.round(e.touches[0].screenY - elem.getBoundingClientRect().top);
+        variablesJson.drawPane.sendable["mouse"].x = Math.round(e.touches[0].pageX - elem.getBoundingClientRect().left);
+        variablesJson.drawPane.sendable["mouse"].y = Math.round(e.touches[0].pageY - elem.getBoundingClientRect().top);
       }, false);
 
     }
@@ -348,7 +351,17 @@
       undoLast();
     }, false);
 
+    var saveButton = document.getElementById("save_button");
+    saveButton.addEventListener("click", downloadCanvasAsImage, false);
 
+
+  }
+
+  function downloadCanvasAsImage() {
+    console.log("download");
+    variablesJson.drawPane["ctx"].drawImage(variablesJson.drawPane["tmp_canvas"], 0, 0);
+    var dt = variablesJson.drawPane["canvas"].toDataURL('image/jpeg');
+    this.href = dt;
   }
 
   function undoLast() {
@@ -357,10 +370,10 @@
     //console.log(variablesJson.drawPane["canvas"].toDataURL());
     variablesJson.drawPane.sendable["canvasDataUrl"] = variablesJson.drawPane["canvas"].toDataURL();
     variablesJson.drawPane.sendable.clientInfo["requestCanvas"] = false; //set to false so other clients wont send their hole canvas back to us. (loop prevention)
-    variablesJson.drawPane.sendable["undoLast"]=true;
+    variablesJson.drawPane.sendable["undoLast"] = true;
     sendInstructions(JSON.stringify(variablesJson.drawPane.sendable));
     variablesJson.drawPane.sendable["canvasDataUrl"] = ''; //delete canvas data url from sendable so we only send it once
-    variablesJson.drawPane.sendable["undoLast"]=false;
+    variablesJson.drawPane.sendable["undoLast"] = false;
     //  console.log("achtuuuuuuung: ");
     //  console.log(variablesJson.drawPane.sendable);
 
@@ -422,7 +435,7 @@
                 variablesJson.drawPane.sendable["canvasDataUrl"] = ''; //delete canvas data url from sendable so we only send it once
 
               } else {
-                if ((variablesJson.drawPane.received.clientInfo["groupName"] == variablesJson.drawPane.sendable.clientInfo["groupName"]) && (variablesJson.drawPane.received["undoLast"]==true) && variablesJson.drawPane.received.hasOwnProperty("canvasDataUrl")) {
+                if ((variablesJson.drawPane.received.clientInfo["groupName"] == variablesJson.drawPane.sendable.clientInfo["groupName"]) && (variablesJson.drawPane.received["undoLast"] == true) && variablesJson.drawPane.received.hasOwnProperty("canvasDataUrl")) {
                   //if we requested the hole canvas from other clients of our new group draw received results
                   //console.log("test before writing canvas");
                   //console.log(variablesJson.drawPane.received["canvasDataUrl"]);
@@ -459,7 +472,7 @@
     }
   }
 
-  function clearDrawPane(){
+  function clearDrawPane() {
     //implement removal of all already drawn stuff here
 
     variablesJson.drawPane["tmp_ctx"].clearRect(0, 0, variablesJson.drawPane["tmp_canvas"].width, variablesJson.drawPane["tmp_canvas"].height);

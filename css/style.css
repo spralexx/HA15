@@ -3,6 +3,8 @@ header {
 }
 #body_main {
   width: 100%;
+  margin:0;
+
 }
 
 /*############################left menue################*/
@@ -10,11 +12,7 @@ header {
 #left_menue {
   float: left;
   width: 15%;
-}
-#left_menue:after {
-  content: '';
-  display: block;
-  clear: both;
+  margin:1em;
 }
 #tool_table table {
   width: 100%;
@@ -34,20 +32,37 @@ header {
   margin-bottom:1em;
 }
 
+#left_menue:after {
+  content: '';
+  display: block;
+  clear: both;
+}
 /*##########################right menue#################*/
 
 #right_menue {
   float: right;
+  margin:1em;
+  width:15%;
 }
 #right_menue:after {
   content: '';
   display: block;
   clear: both;
 }
+#undo_button{
+  margin-bottom:2em;
+}
+
+/*#########################paint_section###################*/
+#paint_section{
+  text-align:center;
+
+}
 
 /*#############################draw pane##################*/
 
 #sketch {
+  border:2px solid blue;
   position: relative;
   text-align: center;
   margin: auto;
