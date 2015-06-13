@@ -62,6 +62,7 @@ header {
 /*#############################draw pane##################*/
 
 #sketch {
+  overflow:auto;
   border:2px solid blue;
   position: relative;
   text-align: center;

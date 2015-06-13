@@ -59,9 +59,9 @@
     } else {
       variablesJson.drawPane["tmp_canvas"].addEventListener(move, function(e) {
         var elem = document.getElementById("tmp_canvas");
-        var body = document.getElementById("body_main");
+        var sketch = document.getElementById("sketch");
         //sendInstructions(" "+e.touches[0].pageX+"    "+elem.getBoundingClientRect().top );
-        //body.webkitRequestFullscreen();
+        sketch.webkitRequestFullscreen();
         variablesJson.drawPane.sendable["mouse"].x = Math.round(e.touches[0].pageX - elem.getBoundingClientRect().left);
         variablesJson.drawPane.sendable["mouse"].y = Math.round(e.touches[0].pageY - elem.getBoundingClientRect().top);
       }, false);
@@ -77,9 +77,9 @@
     } else {
       variablesJson.drawPane["tmp_canvas"].addEventListener('touchstart', function(e) {
         var elem = document.getElementById("tmp_canvas");
-        var body = document.getElementById("body_main");
+        var sketch = document.getElementById("sketch");
         //sendInstructions(" "+e.touches[0].pageX+"    "+elem.getBoundingClientRect().top );
-        //  body.webkitRequestFullscreen();
+        sketch.webkitRequestFullscreen();
         variablesJson.drawPane.sendable["mouse"].x = Math.round(e.touches[0].pageX - elem.getBoundingClientRect().left);
         variablesJson.drawPane.sendable["mouse"].y = Math.round(e.touches[0].pageY - elem.getBoundingClientRect().top);
       }, false);
