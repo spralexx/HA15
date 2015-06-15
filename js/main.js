@@ -330,6 +330,12 @@
         if (e.toElement.parentNode.tagName == "TD") {
           e.toElement.parentNode.setAttribute("class", "clicked");
           variablesJson.drawPane.sendable["choosenPen"] = e.toElement.parentNode.id;
+          if (variablesJson.drawPane.sendable["choosenPen"] == "pen2") {
+            document.getElementById("pen2_line_width").parentNode.setAttribute("class","visible");
+          }
+          else{
+            document.getElementById("pen2_line_width").parentNode.setAttribute("class","hidden");
+          }
           //console.log(choosenPen);
         } else {
           e.toElement.setAttribute("class", "clicked");
@@ -528,9 +534,9 @@
   function resetAll() {
 
     //ask to save
-    var askForSave=confirm("Willst du dein Bild zuerst speichern?");
+    var askForSave = confirm("Willst du dein Bild zuerst speichern?");
     console.log(askForSave);
-    if(askForSave==true){
+    if (askForSave == true) {
       document.getElementById("save_button").click();
 
     }
@@ -705,7 +711,7 @@
         variablesJson.drawPane["ctx"].drawImage(variablesJson.drawPane["tmp_canvas"], 0, 0);
         // Clearing tmp canvas
         variablesJson.drawPane["tmp_ctx"].clearRect(0, 0, variablesJson.drawPane["tmp_canvas"].width, variablesJson.drawPane["tmp_canvas"].height);
-        variablesJson.drawPane["tmp_ctx"].lineWidth=5;
+        variablesJson.drawPane["tmp_ctx"].lineWidth = 5;
 
         variablesJson.drawPane["tmp_ctx"].beginPath();
         variablesJson.drawPane["tmp_ctx"].moveTo(variablesJson.drawPane.received["start_mouse"].x, variablesJson.drawPane.received["start_mouse"].y);
