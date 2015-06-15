@@ -543,7 +543,7 @@
     try {
       if (localStorage.hasOwnProperty("Net_Paint_sendable") && localStorage.hasOwnProperty("Net_Paint_canvas_data")) {
         variablesJson.drawPane.sendable = JSON.parse(localStorage.getItem("Net_Paint_sendable"));
-
+        //set group from last session if it was connected when leaving
         if (variablesJson.drawPane.sendable.clientInfo["groupName"].search('[a-z A-Z 0-9]{8}-[a-z A-Z 0-9]{4}-[a-z A-Z 0-9]{4}-[a-z A-Z 0-9]{4}-[a-z A-Z 0-9]{12}') == -1) {
           console.log("setting groupname in html to : " + variablesJson.drawPane.sendable.clientInfo["groupName"]);
           var groupNameInHtml = document.createElement("P");
@@ -556,6 +556,11 @@
 
           setDisconnectFromGroupButton();
 
+        }
+
+        //set pen2 line width from last session
+        if(variablesJson.drawPane.sendable["pen2LineWidth"]!=21){ //!=21 as 21 is the default for this slider
+          document.getElementById("pen2_line_width").value=variablesJson.drawPane.sendable["pen2LineWidth"];
         }
 
 
