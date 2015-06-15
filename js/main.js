@@ -534,6 +534,8 @@
       document.getElementById("save_button").click();
 
     }
+    variablesJson.drawPane["ctx"].drawImage(variablesJson.drawPane["tmp_canvas"], 0, 0);
+    variablesJson.drawPane["tmp_ctx"].clearRect(0, 0, variablesJson.drawPane["tmp_canvas"].width, variablesJson.drawPane["tmp_canvas"].height);
     //reset everything to zero
     variablesJson.drawPane["colorChooser"].removeFromDom();
 
@@ -596,6 +598,7 @@
 
       document.getElementById("save_button").download = filename;
       variablesJson.drawPane["ctx"].drawImage(variablesJson.drawPane["tmp_canvas"], 0, 0);
+      variablesJson.drawPane["tmp_ctx"].clearRect(0, 0, variablesJson.drawPane["tmp_canvas"].width, variablesJson.drawPane["tmp_canvas"].height);
       var dt = variablesJson.drawPane["canvas"].toDataURL('image/jpeg');
       this.href = dt;
     }
