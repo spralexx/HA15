@@ -94,6 +94,7 @@
           // Clearing tmp canvas
           variablesJson.drawPane["tmp_ctx"].clearRect(0, 0, variablesJson.drawPane["tmp_canvas"].width, variablesJson.drawPane["tmp_canvas"].height);
           variablesJson.drawPane["tmp_ctx"].strokeStyle = variablesJson.drawPane.sendable["choosenColor"];
+          variablesJson.drawPane["tmp_ctx"].lineWidth = 5;
           variablesJson.drawPane["tmp_ctx"].beginPath();
 
           variablesJson.drawPane.sendable["start_mouse"].x = variablesJson.drawPane.sendable["mouse"].x;
@@ -127,6 +128,21 @@
           variablesJson.drawPane["onPaint"]();
           variablesJson.drawPane.sendable["sprayIntervalID"] = setInterval(variablesJson.drawPane["onPaint"], 50);
           break;
+        case "pen2":
+          // Writing down to real canvas now
+          variablesJson.drawPane["ctx"].drawImage(variablesJson.drawPane["tmp_canvas"], 0, 0);
+          // Clearing tmp canvas
+          variablesJson.drawPane["tmp_ctx"].clearRect(0, 0, variablesJson.drawPane["tmp_canvas"].width, variablesJson.drawPane["tmp_canvas"].height);
+          variablesJson.drawPane["tmp_ctx"].strokeStyle = variablesJson.drawPane.sendable["choosenColor"];
+          variablesJson.drawPane.sendable["pen2LineWidth"]=document.getElementById("pen2_line_width").value;
+          variablesJson.drawPane["tmp_ctx"].lineWidth = variablesJson.drawPane.sendable["pen2LineWidth"];
+          variablesJson.drawPane["tmp_ctx"].beginPath();
+
+          variablesJson.drawPane.sendable["start_mouse"].x = variablesJson.drawPane.sendable["mouse"].x;
+          variablesJson.drawPane.sendable["start_mouse"].y = variablesJson.drawPane.sendable["mouse"].y;
+          variablesJson.drawPane["tmp_ctx"].moveTo(variablesJson.drawPane.sendable["mouse"].x, variablesJson.drawPane.sendable["mouse"].y);
+          variablesJson.drawPane["tmp_canvas"].addEventListener(move, variablesJson.drawPane["onPaint"], false);
+          break;
       }
 
     }, false);
@@ -142,6 +158,10 @@
           variablesJson.drawPane["tmp_canvas"].removeEventListener('mousemove', variablesJson.drawPane["onPaint"], false);
           variablesJson.drawPane["tmp_canvas"].removeEventListener('touchmove', variablesJson.drawPane["onPaint"], false);
           clearInterval(variablesJson.drawPane.sendable["sprayIntervalID"]);
+          break;
+        case "pen2":
+          variablesJson.drawPane["tmp_canvas"].removeEventListener('touchmove', variablesJson.drawPane["onPaint"], false);
+          variablesJson.drawPane["tmp_canvas"].removeEventListener('mousemove', variablesJson.drawPane["onPaint"], false);
           break;
       }
     }, false);
@@ -167,7 +187,10 @@
 
           break;
         case "pen2":
-
+          variablesJson.drawPane["tmp_ctx"].lineTo(variablesJson.drawPane.sendable["mouse"].x, variablesJson.drawPane.sendable["mouse"].y);
+          variablesJson.drawPane.sendable["start_mouse"].x = variablesJson.drawPane.sendable["mouse"].x;
+          variablesJson.drawPane.sendable["start_mouse"].y = variablesJson.drawPane.sendable["mouse"].y;
+          variablesJson.drawPane["tmp_ctx"].stroke();
           break;
       }
     }
@@ -329,7 +352,6 @@
     setDrawEventListener('touchmove', 'touchstart', 'touchend');
 
     /* Drawing on Paint App */
-    variablesJson.drawPane["tmp_ctx"].lineWidth = 5;
     variablesJson.drawPane["tmp_ctx"].lineJoin = 'round';
     variablesJson.drawPane["tmp_ctx"].lineCap = 'round';
     variablesJson.drawPane["tmp_ctx"].strokeStyle = 'blue';
@@ -361,6 +383,7 @@
     //console.log(JSON.stringify(variablesJson.drawPane.sendable));
     //console.log(variablesJson);
     //console.log(variablesJson);
+
 
 
     //init connection to websocket broadcast server
@@ -404,6 +427,7 @@
 
 
   }
+
 
   function resetAll() {
     //reset everything to zero
@@ -653,6 +677,22 @@
         variablesJson.drawPane.received["generateSprayParticles"]();
 
         //  variablesJson.drawPane.received["sprayIntervalID"] = setInterval(variablesJson.drawPane["onPaint"], 50);
+        break;
+
+      case "pen2":
+        // Writing down to real canvas now
+        variablesJson.drawPane["ctx"].drawImage(variablesJson.drawPane["tmp_canvas"], 0, 0);
+        // Clearing tmp canvas
+        variablesJson.drawPane["tmp_ctx"].clearRect(0, 0, variablesJson.drawPane["tmp_canvas"].width, variablesJson.drawPane["tmp_canvas"].height);
+        variablesJson.drawPane["tmp_ctx"].lineWidth=variablesJson.drawPane.received["pen2LineWidth"];
+        variablesJson.drawPane["tmp_ctx"].beginPath();
+        variablesJson.drawPane["tmp_ctx"].moveTo(variablesJson.drawPane.received["start_mouse"].x, variablesJson.drawPane.received["start_mouse"].y);
+
+        //console.log(variablesJson.drawPane.received["choosenColor"]);
+        variablesJson.drawPane["tmp_ctx"].strokeStyle = variablesJson.drawPane.received["choosenColor"];
+        variablesJson.drawPane["tmp_ctx"].lineTo(variablesJson.drawPane.received["mouse"].x, variablesJson.drawPane.received["mouse"].y);
+        variablesJson.drawPane["tmp_ctx"].stroke();
+
         break;
     }
 
