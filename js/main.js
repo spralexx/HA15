@@ -134,7 +134,7 @@
           // Clearing tmp canvas
           variablesJson.drawPane["tmp_ctx"].clearRect(0, 0, variablesJson.drawPane["tmp_canvas"].width, variablesJson.drawPane["tmp_canvas"].height);
           variablesJson.drawPane["tmp_ctx"].strokeStyle = variablesJson.drawPane.sendable["choosenColor"];
-          variablesJson.drawPane.sendable["pen2LineWidth"]=document.getElementById("pen2_line_width").value;
+          variablesJson.drawPane.sendable["pen2LineWidth"] = document.getElementById("pen2_line_width").value;
           variablesJson.drawPane["tmp_ctx"].lineWidth = variablesJson.drawPane.sendable["pen2LineWidth"];
           variablesJson.drawPane["tmp_ctx"].beginPath();
 
@@ -237,18 +237,13 @@
       if (ws.readyState == 1) {
         //console.log(JSON.stringify(variablesJson.drawPane.sendable).length);
         ws.send(variablesJson.drawPane.sendable.clientInfo["uuid"] + stringToSend.substring(0, 164));
-        console.log("String sent: uuid: " + variablesJson.drawPane.sendable.clientInfo["uuid"] + stringToSend.substring(0, 164));
-        console.log("get canvas?: " + variablesJson.drawPane.sendable.clientInfo["requestCanvas"]);
+        //console.log("String sent: uuid: " + variablesJson.drawPane.sendable.clientInfo["uuid"] + stringToSend.substring(0, 164));
+        //console.log("get canvas?: " + variablesJson.drawPane.sendable.clientInfo["requestCanvas"]);
         stringToSend = stringToSend.substring(164, stringToSend.length);
       } else {
         //console.log("##############ws has been closed. reconnecting...");
-        ws = new ConnectToWebsocketBroadcastServer();
-        setOnMessagehandlerforWsConnection();
-        ws.onopen = function() {
-          this.send("gibUrlUndPort");
-          this.send(variablesJson.drawPane.sendable.clientInfo["uuid"] + stringToSend.substring(0, 164));
-          stringToSend = stringToSend.substring(164, stringToSend.length);
-        }
+        setupWebsocketConnection();
+
       }
     }
 
@@ -387,6 +382,35 @@
 
 
     //init connection to websocket broadcast server
+    setupWebsocketConnection();
+
+
+    variablesJson.drawPane["groupConnectButton"] = document.getElementById("groupConnectButton");
+
+    setConnectToGroupButton();
+
+    //try loading stuff from previos session
+    loadfromLocalStorage();
+
+
+    var undoButton = document.getElementById("undo_button");
+    undoButton.addEventListener('click', function(e) {
+      e.preventDefault();
+      undoLast();
+    }, false);
+
+    var saveButton = document.getElementById("save_button");
+    saveButton.addEventListener("click", downloadCanvasAsImage, false);
+
+    var resetButton = document.getElementById("reset_button");
+    resetButton.addEventListener('click', resetAll, false);
+
+
+
+
+  }
+
+  function setupWebsocketConnection() {
     try {
       //ws = new WebSocket("ws://mediengeil.org:8080");
       //ws = new WebSocket("ws://localhost.org:8080");
@@ -402,28 +426,96 @@
       ws.onclose = function() {
         //console.log("Verbindung beendet, readyState: " + this.readyState);
       };
+
+      var senderUuid = '';
+      var storeSplittedMessage = '';
+      var firstCanvasSenderUuid = '';
+      var messagesByUuid = {
+        "messages": {
+
+        }
+      };
+      ws.onmessage = function(e) {
+        //console.log(e.data);
+        //console.log(storeSplittedMessage);
+        //console.log(messagesByUuid.messages);
+        if (e.data.substring(0, 3) == "+++") {
+          //    console.log(e.data);
+        } else {
+          try {
+            senderUuid = e.data.substring(0, 36);
+            if (messagesByUuid.messages.hasOwnProperty(senderUuid)) {
+              messagesByUuid.messages[senderUuid] = messagesByUuid.messages[senderUuid] + e.data.substring(36, e.data.length);
+              //console.log(JSON.parse(messagesByUuid.messages[senderUuid]));
+              var receivedJSON = JSON.parse(messagesByUuid.messages[senderUuid]);
+              console.log(receivedJSON.clientInfo);
+              //  console.log(variablesJson.drawPane.sendable.clientInfo["groupName"]);
+              //messagesByUuid.messages[senderUuid] = '';
+              if (receivedJSON.clientInfo["groupName"] == variablesJson.drawPane.sendable.clientInfo["groupName"]) {
+                variablesJson.drawPane["received"] = receivedJSON;
+                console.log(variablesJson.drawPane["received"]);
+
+                if ((variablesJson.drawPane.received.clientInfo["groupName"] == variablesJson.drawPane.sendable.clientInfo["groupName"]) && (variablesJson.drawPane.received.clientInfo["requestCanvas"] == true)) {
+                  //send our hole canvas to new joining member of our group
+                  console.log("send our hole canvas###############");
+                  //console.log(variablesJson.drawPane["canvas"].toDataURL());
+                  variablesJson.drawPane.sendable["canvasDataUrl"] = variablesJson.drawPane["canvas"].toDataURL();
+                  variablesJson.drawPane.sendable.clientInfo["requestCanvas"] = false; //set to false so other clients wont send their hole canvas back to us. (loop prevention)
+                  sendInstructions(JSON.stringify(variablesJson.drawPane.sendable));
+                  variablesJson.drawPane.sendable["canvasDataUrl"] = ''; //delete canvas data url from sendable so we only send it once
+                  //  console.log("achtuuuuuuung: ");
+                  //  console.log(variablesJson.drawPane.sendable);
+
+                }
+                if ((variablesJson.drawPane.received.clientInfo["groupName"] == variablesJson.drawPane.sendable.clientInfo["groupName"]) && (variablesJson.drawPane.sendable.clientInfo["requestCanvas"] == true) && variablesJson.drawPane.received.hasOwnProperty("canvasDataUrl")) {
+                  //if we requested the hole canvas from other clients of our new group draw received results
+                  //console.log("test before writing canvas");
+                  //console.log(variablesJson.drawPane.received["canvasDataUrl"]);
+                  var image = new Image();
+                  image.src = variablesJson.drawPane.received["canvasDataUrl"];
+                  variablesJson.drawPane["ctx"].drawImage(image, 0, 0);
+                  variablesJson.drawPane.sendable.clientInfo["requestCanvas"] = false; //now we have the hole canvas. ne need to request it every time on send.
+                  variablesJson.drawPane.sendable["canvasDataUrl"] = ''; //delete canvas data url from sendable so we only send it once
+
+                } else {
+                  if ((variablesJson.drawPane.received.clientInfo["groupName"] == variablesJson.drawPane.sendable.clientInfo["groupName"]) && (variablesJson.drawPane.received["undoLast"] == true) && variablesJson.drawPane.received.hasOwnProperty("canvasDataUrl")) {
+                    //if we requested the hole canvas from other clients of our new group draw received results
+                    //console.log("test before writing canvas");
+                    //console.log(variablesJson.drawPane.received["canvasDataUrl"]);
+                    clearDrawPane();
+                    var image = new Image();
+                    image.src = variablesJson.drawPane.received["canvasDataUrl"];
+                    variablesJson.drawPane["ctx"].drawImage(image, 0, 0);
+                    variablesJson.drawPane.sendable.clientInfo["requestCanvas"] = false; //now we have the hole canvas. ne need to request it every time on send.
+                    variablesJson.drawPane.sendable["canvasDataUrl"] = ''; //delete canvas data url from sendable so we only send it once
+
+                  } else {
+                    if (variablesJson.drawPane.received.clientInfo["groupName"] == variablesJson.drawPane.sendable.clientInfo["groupName"]) {
+                      drawReceived();
+                    }
+                  }
+                }
+                console.log(messagesByUuid.messages.hasOwnProperty(senderUuid));
+                delete messagesByUuid.messages[senderUuid];
+
+              } else {
+                delete messagesByUuid.messages[senderUuid];
+              }
+
+            } else {
+              messagesByUuid.messages[senderUuid] = e.data.substring(36, e.data.length);
+            }
+
+          } catch (err) {
+            storeSplittedMessage = storeSplittedMessage + e.data.substring(36, e.data.length);
+            //console.log(storeSplittedMessage);
+            console.log("ERROR!!: " + err.message); //this error will mostlikely show "unexpected end of input" beacause of that 200 charecters limit on serverside
+          }
+        }
+      }
     } catch (e) {
       //console.log("ERROR!!: " + e.message);
     }
-    //set onMessage handler to process new messages
-    setOnMessagehandlerforWsConnection();
-
-    setConnectToGroupButton();
-    var undoButton = document.getElementById("undo_button");
-    undoButton.addEventListener('click', function(e) {
-      e.preventDefault();
-      undoLast();
-    }, false);
-
-    var saveButton = document.getElementById("save_button");
-    saveButton.addEventListener("click", downloadCanvasAsImage, false);
-
-    var resetButton = document.getElementById("reset_button");
-    resetButton.addEventListener('click', resetAll, false);
-
-
-    //try loading stuff from previos session
-    loadfromLocalStorage();
 
 
   }
@@ -450,8 +542,23 @@
   function loadfromLocalStorage() {
     try {
       if (localStorage.hasOwnProperty("Net_Paint_sendable") && localStorage.hasOwnProperty("Net_Paint_canvas_data")) {
-
         variablesJson.drawPane.sendable = JSON.parse(localStorage.getItem("Net_Paint_sendable"));
+
+        if (variablesJson.drawPane.sendable.clientInfo["groupName"].search('[a-z A-Z 0-9]{8}-[a-z A-Z 0-9]{4}-[a-z A-Z 0-9]{4}-[a-z A-Z 0-9]{4}-[a-z A-Z 0-9]{12}') == -1) {
+          console.log("setting groupname in html to : " + variablesJson.drawPane.sendable.clientInfo["groupName"]);
+          var groupNameInHtml = document.createElement("P");
+          var text = document.createTextNode(variablesJson.drawPane.sendable.clientInfo["groupName"]);
+          groupNameInHtml.appendChild(text);
+          document.getElementById("group-input-form").appendChild(groupNameInHtml);
+
+          variablesJson.drawPane["groupConnectButton"].value = "Von Gruppe trennen";
+          variablesJson.drawPane["groupConnectButton"].removeEventListener('click', variablesJson.drawPane["connectFunction"], false);
+
+          setDisconnectFromGroupButton();
+
+        }
+
+
         var image = new Image();
         image.src = localStorage.getItem("Net_Paint_canvas_data");
         variablesJson.drawPane["ctx"].drawImage(image, 0, 0);
@@ -462,6 +569,7 @@
       //clear local storage as something dosnt seem to be correct with it and we dont want to get errors on every reload
       localStorage.clear();
     }
+
   }
 
   function downloadCanvasAsImage() {
@@ -490,95 +598,6 @@
   }
 
 
-  function setOnMessagehandlerforWsConnection() {
-    var senderUuid = '';
-    var storeSplittedMessage = '';
-    var firstCanvasSenderUuid = '';
-    var messagesByUuid = {
-      "messages": {
-
-      }
-    };
-    ws.onmessage = function(e) {
-      console.log(e.data);
-      //console.log(storeSplittedMessage);
-      console.log(messagesByUuid.messages);
-      if (e.data.substring(0, 3) == "+++") {
-        //    console.log(e.data);
-      } else {
-        try {
-          senderUuid = e.data.substring(0, 36);
-          if (messagesByUuid.messages.hasOwnProperty(senderUuid)) {
-            messagesByUuid.messages[senderUuid] = messagesByUuid.messages[senderUuid] + e.data.substring(36, e.data.length);
-            //console.log(JSON.parse(messagesByUuid.messages[senderUuid]));
-            var receivedJSON = JSON.parse(messagesByUuid.messages[senderUuid]);
-            console.log(receivedJSON.clientInfo);
-            //  console.log(variablesJson.drawPane.sendable.clientInfo["groupName"]);
-            //messagesByUuid.messages[senderUuid] = '';
-            if (receivedJSON.clientInfo["groupName"] == variablesJson.drawPane.sendable.clientInfo["groupName"]) {
-              variablesJson.drawPane["received"] = receivedJSON;
-              console.log(variablesJson.drawPane["received"]);
-
-              if ((variablesJson.drawPane.received.clientInfo["groupName"] == variablesJson.drawPane.sendable.clientInfo["groupName"]) && (variablesJson.drawPane.received.clientInfo["requestCanvas"] == true)) {
-                //send our hole canvas to new joining member of our group
-                console.log("send our hole canvas###############");
-                //console.log(variablesJson.drawPane["canvas"].toDataURL());
-                variablesJson.drawPane.sendable["canvasDataUrl"] = variablesJson.drawPane["canvas"].toDataURL();
-                variablesJson.drawPane.sendable.clientInfo["requestCanvas"] = false; //set to false so other clients wont send their hole canvas back to us. (loop prevention)
-                sendInstructions(JSON.stringify(variablesJson.drawPane.sendable));
-                variablesJson.drawPane.sendable["canvasDataUrl"] = ''; //delete canvas data url from sendable so we only send it once
-                //  console.log("achtuuuuuuung: ");
-                //  console.log(variablesJson.drawPane.sendable);
-
-              }
-              if ((variablesJson.drawPane.received.clientInfo["groupName"] == variablesJson.drawPane.sendable.clientInfo["groupName"]) && (variablesJson.drawPane.sendable.clientInfo["requestCanvas"] == true) && variablesJson.drawPane.received.hasOwnProperty("canvasDataUrl")) {
-                //if we requested the hole canvas from other clients of our new group draw received results
-                //console.log("test before writing canvas");
-                //console.log(variablesJson.drawPane.received["canvasDataUrl"]);
-                var image = new Image();
-                image.src = variablesJson.drawPane.received["canvasDataUrl"];
-                variablesJson.drawPane["ctx"].drawImage(image, 0, 0);
-                variablesJson.drawPane.sendable.clientInfo["requestCanvas"] = false; //now we have the hole canvas. ne need to request it every time on send.
-                variablesJson.drawPane.sendable["canvasDataUrl"] = ''; //delete canvas data url from sendable so we only send it once
-
-              } else {
-                if ((variablesJson.drawPane.received.clientInfo["groupName"] == variablesJson.drawPane.sendable.clientInfo["groupName"]) && (variablesJson.drawPane.received["undoLast"] == true) && variablesJson.drawPane.received.hasOwnProperty("canvasDataUrl")) {
-                  //if we requested the hole canvas from other clients of our new group draw received results
-                  //console.log("test before writing canvas");
-                  //console.log(variablesJson.drawPane.received["canvasDataUrl"]);
-                  clearDrawPane();
-                  var image = new Image();
-                  image.src = variablesJson.drawPane.received["canvasDataUrl"];
-                  variablesJson.drawPane["ctx"].drawImage(image, 0, 0);
-                  variablesJson.drawPane.sendable.clientInfo["requestCanvas"] = false; //now we have the hole canvas. ne need to request it every time on send.
-                  variablesJson.drawPane.sendable["canvasDataUrl"] = ''; //delete canvas data url from sendable so we only send it once
-
-                } else {
-                  if (variablesJson.drawPane.received.clientInfo["groupName"] == variablesJson.drawPane.sendable.clientInfo["groupName"]) {
-                    drawReceived();
-                  }
-                }
-              }
-              console.log(messagesByUuid.messages.hasOwnProperty(senderUuid));
-              delete messagesByUuid.messages[senderUuid];
-
-            } else {
-              delete messagesByUuid.messages[senderUuid];
-            }
-
-          } else {
-            messagesByUuid.messages[senderUuid] = e.data.substring(36, e.data.length);
-          }
-
-        } catch (err) {
-          storeSplittedMessage = storeSplittedMessage + e.data.substring(36, e.data.length);
-          //console.log(storeSplittedMessage);
-          console.log("ERROR!!: " + err.message); //this error will mostlikely show "unexpected end of input" beacause of that 200 charecters limit on serverside
-        }
-      }
-    }
-  }
-
   function clearDrawPane() {
     //implement removal of all already drawn stuff here
 
@@ -587,22 +606,29 @@
   }
 
   function setConnectToGroupButton() {
-    var groupConnectButton = document.getElementById("groupConnectButton");
-    groupConnectButton.addEventListener('click', function connect(e) {
-      variablesJson.drawPane.sendable.clientInfo["groupName"] = document.getElementById("groupName").value;
-      variablesJson.drawPane.sendable.clientInfo["requestCanvas"] = true;
-      getCanvasFromOtherClients();
-      //variablesJson.drawPane.sendable.clientInfo["requestCanvas"]=false; //cant set it to false here because in ws.onmessage case to paint would be wrong
-      e.preventDefault();
-      console.log("Gruppenname: " + variablesJson.drawPane.sendable.clientInfo["groupName"]);
-      var groupNameInHtml = document.createElement("P");
-      var text = document.createTextNode(variablesJson.drawPane.sendable.clientInfo["groupName"]);
-      groupNameInHtml.appendChild(text);
-      document.getElementById("group-input-form").appendChild(groupNameInHtml);
-      groupConnectButton.removeEventListener('click', connect, false);
-      groupConnectButton.value = "Von Gruppe trennen";
-      setDisconnectFromGroupButton();
-    }, false);
+
+    variablesJson.drawPane["groupConnectButton"].addEventListener('click',variablesJson.drawPane["connectFunction"], false);
+
+  }
+
+  variablesJson.drawPane["connectFunction"] = function(e) {
+   e.preventDefault();
+   variablesJson.drawPane.sendable.clientInfo["groupName"] = document.getElementById("groupName").value;
+   variablesJson.drawPane.sendable.clientInfo["requestCanvas"] = true;
+   getCanvasFromOtherClients();
+   //variablesJson.drawPane.sendable.clientInfo["requestCanvas"]=false; //cant set it to false here because in ws.onmessage case to paint would be wrong
+   console.log("Gruppenname: " + variablesJson.drawPane.sendable.clientInfo["groupName"]);
+   var groupNameInHtml = document.createElement("P");
+   var text = document.createTextNode(variablesJson.drawPane.sendable.clientInfo["groupName"]);
+   groupNameInHtml.appendChild(text);
+   document.getElementById("group-input-form").appendChild(groupNameInHtml);
+
+   variablesJson.drawPane["groupConnectButton"].value = "Von Gruppe trennen";
+   variablesJson.drawPane["groupConnectButton"].removeEventListener('click', variablesJson.drawPane["connectFunction"], false);
+   setDisconnectFromGroupButton();
+ }
+
+  function connectToGroup(groupName) {
 
   }
 
@@ -612,14 +638,18 @@
   }
 
   function setDisconnectFromGroupButton() {
-    groupConnectButton.addEventListener('click', function disconnect(e) {
+    variablesJson.drawPane["groupConnectButton"].addEventListener('click', function disconnect(e) {
       e.preventDefault();
       document.getElementById("group-input-form").removeChild(document.getElementById("group-input-form").lastChild);
-      groupConnectButton.value = "Mit Gruppe verbinden";
+      variablesJson.drawPane["groupConnectButton"].value = "Mit Gruppe verbinden";
       variablesJson.drawPane.sendable.clientInfo["groupName"] = generateUUID(); //beacause a uuid is as its name says universal unique no other client will have the same groupname so no draw instructions that will be received will be shown
-      groupConnectButton.removeEventListener('click', disconnect, false);
-      setConnectToGroupButton()
+      variablesJson.drawPane["groupConnectButton"].removeEventListener('click', disconnect, false);
+      setConnectToGroupButton();
     }, false);
+  }
+
+  function disconnectFromGroup() {
+
   }
 
   function drawReceived() {
@@ -684,7 +714,7 @@
         variablesJson.drawPane["ctx"].drawImage(variablesJson.drawPane["tmp_canvas"], 0, 0);
         // Clearing tmp canvas
         variablesJson.drawPane["tmp_ctx"].clearRect(0, 0, variablesJson.drawPane["tmp_canvas"].width, variablesJson.drawPane["tmp_canvas"].height);
-        variablesJson.drawPane["tmp_ctx"].lineWidth=variablesJson.drawPane.received["pen2LineWidth"];
+        variablesJson.drawPane["tmp_ctx"].lineWidth = variablesJson.drawPane.received["pen2LineWidth"];
         variablesJson.drawPane["tmp_ctx"].beginPath();
         variablesJson.drawPane["tmp_ctx"].moveTo(variablesJson.drawPane.received["start_mouse"].x, variablesJson.drawPane.received["start_mouse"].y);
 
