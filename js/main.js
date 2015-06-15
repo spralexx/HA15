@@ -247,6 +247,10 @@
       }
     }
 
+    saveDataToLocalStorage();
+  }
+
+  function saveDataToLocalStorage() {
     localStorage.setItem("Net_Paint_sendable", JSON.stringify(variablesJson.drawPane.sendable));
     localStorage.setItem("Net_Paint_canvas_data", variablesJson.drawPane["canvas"].toDataURL());
   }
@@ -522,6 +526,14 @@
 
 
   function resetAll() {
+
+    //ask to save
+    var askForSave=confirm("Willst du dein Bild zuerst speichern?");
+    console.log(askForSave);
+    if(askForSave==true){
+      document.getElementById("save_button").click();
+
+    }
     //reset everything to zero
     variablesJson.drawPane["colorChooser"].removeFromDom();
 
@@ -559,8 +571,8 @@
         }
 
         //set pen2 line width from last session
-        if(variablesJson.drawPane.sendable["pen2LineWidth"]!=21){ //!=21 as 21 is the default for this slider
-          document.getElementById("pen2_line_width").value=variablesJson.drawPane.sendable["pen2LineWidth"];
+        if (variablesJson.drawPane.sendable["pen2LineWidth"] != 21) { //!=21 as 21 is the default for this slider
+          document.getElementById("pen2_line_width").value = variablesJson.drawPane.sendable["pen2LineWidth"];
         }
 
 
@@ -579,9 +591,14 @@
 
   function downloadCanvasAsImage() {
     console.log("download");
-    variablesJson.drawPane["ctx"].drawImage(variablesJson.drawPane["tmp_canvas"], 0, 0);
-    var dt = variablesJson.drawPane["canvas"].toDataURL('image/jpeg');
-    this.href = dt;
+    var filename = prompt("Bitte dateinamen eingeben:")
+    if (filename != null) {
+
+      document.getElementById("save_button").download = filename;
+      variablesJson.drawPane["ctx"].drawImage(variablesJson.drawPane["tmp_canvas"], 0, 0);
+      var dt = variablesJson.drawPane["canvas"].toDataURL('image/jpeg');
+      this.href = dt;
+    }
   }
 
   function undoLast() {
@@ -612,26 +629,26 @@
 
   function setConnectToGroupButton() {
 
-    variablesJson.drawPane["groupConnectButton"].addEventListener('click',variablesJson.drawPane["connectFunction"], false);
+    variablesJson.drawPane["groupConnectButton"].addEventListener('click', variablesJson.drawPane["connectFunction"], false);
 
   }
 
   variablesJson.drawPane["connectFunction"] = function(e) {
-   e.preventDefault();
-   variablesJson.drawPane.sendable.clientInfo["groupName"] = document.getElementById("groupName").value;
-   variablesJson.drawPane.sendable.clientInfo["requestCanvas"] = true;
-   getCanvasFromOtherClients();
-   //variablesJson.drawPane.sendable.clientInfo["requestCanvas"]=false; //cant set it to false here because in ws.onmessage case to paint would be wrong
-   console.log("Gruppenname: " + variablesJson.drawPane.sendable.clientInfo["groupName"]);
-   var groupNameInHtml = document.createElement("P");
-   var text = document.createTextNode(variablesJson.drawPane.sendable.clientInfo["groupName"]);
-   groupNameInHtml.appendChild(text);
-   document.getElementById("group-input-form").appendChild(groupNameInHtml);
+    e.preventDefault();
+    variablesJson.drawPane.sendable.clientInfo["groupName"] = document.getElementById("groupName").value;
+    variablesJson.drawPane.sendable.clientInfo["requestCanvas"] = true;
+    getCanvasFromOtherClients();
+    //variablesJson.drawPane.sendable.clientInfo["requestCanvas"]=false; //cant set it to false here because in ws.onmessage case to paint would be wrong
+    console.log("Gruppenname: " + variablesJson.drawPane.sendable.clientInfo["groupName"]);
+    var groupNameInHtml = document.createElement("P");
+    var text = document.createTextNode(variablesJson.drawPane.sendable.clientInfo["groupName"]);
+    groupNameInHtml.appendChild(text);
+    document.getElementById("group-input-form").appendChild(groupNameInHtml);
 
-   variablesJson.drawPane["groupConnectButton"].value = "Von Gruppe trennen";
-   variablesJson.drawPane["groupConnectButton"].removeEventListener('click', variablesJson.drawPane["connectFunction"], false);
-   setDisconnectFromGroupButton();
- }
+    variablesJson.drawPane["groupConnectButton"].value = "Von Gruppe trennen";
+    variablesJson.drawPane["groupConnectButton"].removeEventListener('click', variablesJson.drawPane["connectFunction"], false);
+    setDisconnectFromGroupButton();
+  }
 
   function connectToGroup(groupName) {
 
@@ -685,6 +702,7 @@
         variablesJson.drawPane["ctx"].drawImage(variablesJson.drawPane["tmp_canvas"], 0, 0);
         // Clearing tmp canvas
         variablesJson.drawPane["tmp_ctx"].clearRect(0, 0, variablesJson.drawPane["tmp_canvas"].width, variablesJson.drawPane["tmp_canvas"].height);
+        variablesJson.drawPane["tmp_ctx"].lineWidth=5;
 
         variablesJson.drawPane["tmp_ctx"].beginPath();
         variablesJson.drawPane["tmp_ctx"].moveTo(variablesJson.drawPane.received["start_mouse"].x, variablesJson.drawPane.received["start_mouse"].y);
@@ -744,6 +762,8 @@
   }
 
 
+
   window.addEventListener("load", start);
+
 
 }());
