@@ -40,7 +40,7 @@
     variablesJson.drawPane.sendable["choosenPen"] = '';
 
     //clear main canvas so the downloaded picture dont has a black background...
-    variablesJson.drawPane["ctx"].fillStyle="white";
+    variablesJson.drawPane["ctx"].fillStyle = "white";
     variablesJson.drawPane["ctx"].fillRect(0, 0, variablesJson.drawPane["tmp_canvas"].width, variablesJson.drawPane["tmp_canvas"].height);
 
   }
@@ -238,6 +238,7 @@
     var colorArray = returnColorArray(counter);
     //console.log(colorArray);
     var colorCounter = colorArray.length - 1;
+    this.trArray = [];
 
     for (var i = 0; i < counter; i++) {
       this.tr = document.createElement("tr");
@@ -261,7 +262,7 @@
         this.td.appendChild(this.space);
         this.tr.appendChild(this.td);
       }
-      document.getElementById("toolsAndColors").appendChild(this.tr);
+      this.trArray[i] = this.tr;
     }
 
 
@@ -275,6 +276,18 @@
       //    array[i] = "rgb(" + Math.round(Math.random() * 255) + ", " + Math.round(Math.random() * 255) + ", " + Math.round(Math.random() * 255) + ")";
       //  }
       return array;
+    }
+
+    this.removeFromDom = function() {
+      for (var i = 0; i < this.trArray.length; i++) {
+        this.trArray[i].remove();
+      }
+    }
+
+    this.addToHTMLDom = function() {
+      for (var i = 0; i < this.trArray.length; i++) {
+        document.getElementById("toolsAndColors").appendChild(this.trArray[i]);
+      }
     }
 
   }
@@ -326,7 +339,9 @@
     pens[0].setAttribute("class", "clicked");
     variablesJson.drawPane.sendable["choosenPen"] = 'pen0';
 
-    var colorChooser = new PrepareColorChooser(colorchoosersize);
+    variablesJson.drawPane["colorChooser"] = new PrepareColorChooser(colorchoosersize);
+    //console.log(variablesJson.drawPane["colorChooser"]);
+    variablesJson.drawPane["colorChooser"].addToHTMLDom();
 
     for (var element = 3; element < (colorchoosersize * colorchoosersize) + colorchoosersize; element++) {
       var table = document.getElementById("toolsAndColors");
@@ -346,7 +361,28 @@
     //console.log(JSON.stringify(variablesJson.drawPane.sendable));
     //console.log(variablesJson);
     //console.log(variablesJson);
-    ws = new ConnectToWebsocketBroadcastServer();
+
+
+    //init connection to websocket broadcast server
+    try {
+      //ws = new WebSocket("ws://mediengeil.org:8080");
+      //ws = new WebSocket("ws://localhost.org:8080");
+      //ws = new WebSocket("ws://192.168.2.104:8080");
+      //ws = new WebSocket("ws://borsti1.inf.fh-flensburg.de:8080");
+      ws = new WebSocket("ws://192.168.178.55:8080");
+
+      ws.onopen = function() {
+        //console.log(this.readyState);
+        this.send("gibUrlUndPort");
+      };
+
+      ws.onclose = function() {
+        //console.log("Verbindung beendet, readyState: " + this.readyState);
+      };
+    } catch (e) {
+      //console.log("ERROR!!: " + e.message);
+    }
+    //set onMessage handler to process new messages
     setOnMessagehandlerforWsConnection();
 
     setConnectToGroupButton();
@@ -359,6 +395,9 @@
     var saveButton = document.getElementById("save_button");
     saveButton.addEventListener("click", downloadCanvasAsImage, false);
 
+    var resetButton = document.getElementById("reset_button");
+    resetButton.addEventListener('click', resetAll, false);
+
 
     //try loading stuff from previos session
     loadfromLocalStorage();
@@ -366,21 +405,39 @@
 
   }
 
-  function loadfromLocalStorage(){
-    try{
-      if(localStorage.hasOwnProperty("Net_Paint_sendable")&&localStorage.hasOwnProperty("Net_Paint_canvas_data")){
+  function resetAll() {
+    //reset everything to zero
+    variablesJson.drawPane["colorChooser"].removeFromDom();
 
-      variablesJson.drawPane.sendable=JSON.parse(localStorage.getItem("Net_Paint_sendable"));
-      var image = new Image();
-      image.src = localStorage.getItem("Net_Paint_canvas_data");
-      variablesJson.drawPane["ctx"].drawImage(image, 0, 0);
-    //console.log(JSON.parse(localStorage.getItem("Net_Paint_sendable")));
-      }
-    }catch(e){
-    console.log(e.message);
-    //clear local storage as something dosnt seem to be correct with it and we dont want to get errors on every reload
+    variablesJson = {
+      "drawPane": {
+        "sendable": {
+          "clientInfo": {}
+        },
+        "received": {}
+      },
+    };
     localStorage.clear();
+    ws.close();
+    start();
+
   }
+
+  function loadfromLocalStorage() {
+    try {
+      if (localStorage.hasOwnProperty("Net_Paint_sendable") && localStorage.hasOwnProperty("Net_Paint_canvas_data")) {
+
+        variablesJson.drawPane.sendable = JSON.parse(localStorage.getItem("Net_Paint_sendable"));
+        var image = new Image();
+        image.src = localStorage.getItem("Net_Paint_canvas_data");
+        variablesJson.drawPane["ctx"].drawImage(image, 0, 0);
+        //console.log(JSON.parse(localStorage.getItem("Net_Paint_sendable")));
+      }
+    } catch (e) {
+      console.log(e.message);
+      //clear local storage as something dosnt seem to be correct with it and we dont want to get errors on every reload
+      localStorage.clear();
+    }
   }
 
   function downloadCanvasAsImage() {
@@ -409,7 +466,7 @@
   }
 
 
-  function setOnMessagehandlerforWsConnection(){
+  function setOnMessagehandlerforWsConnection() {
     var senderUuid = '';
     var storeSplittedMessage = '';
     var firstCanvasSenderUuid = '';
@@ -599,32 +656,6 @@
         break;
     }
 
-  }
-
-  function ConnectToWebsocketBroadcastServer() {
-
-    //init connection to websocket broadcast server
-    try {
-      //this.websocketConnection = new WebSocket("ws://mediengeil.org:8080");
-      //this.websocketConnection = new WebSocket("ws://localhost.org:8080");
-      //this.websocketConnection = new WebSocket("ws://192.168.2.104:8080");
-      //this.websocketConnection = new WebSocket("ws://borsti1.inf.fh-flensburg.de:8080");
-      this.websocketConnection = new WebSocket("ws://192.168.178.55:8080");
-
-      this.websocketConnection.onopen = function() {
-        //console.log(this.readyState);
-        this.send("gibUrlUndPort");
-      };
-
-      this.websocketConnection.onclose = function() {
-        //console.log("Verbindung beendet, readyState: " + this.readyState);
-      };
-    } catch (e) {
-      //console.log("ERROR!!: " + e.message);
-    }
-    return this.websocketConnection;
-
-    ///////////////////////////////////////////////
   }
 
   function generateUUID() {
