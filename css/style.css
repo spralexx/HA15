@@ -105,6 +105,14 @@ header {
   top: 0;
   cursor: crosshair;
 }
+#received_tmp_canvas {
+  position: absolute;
+  left: 0px;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  cursor: crosshair;
+}
 #drawpane_sizechooser {
   border: 1px solid black;
   width: 65%;
