@@ -5,19 +5,24 @@
 
   <meta charset="UTF-8">
   <title>netPaint</title>
+	<!--Einbinden des erforderlichen Javascripts und des Stylesheets-->
   <link rel="stylesheet" href="css/style.css">
   <script src="js/main.js"></script>
 
 </head>
-
+<!--css wird hauptsächlich über ID's geregelt. häufig wiederkehrende styles werden jedoch in classes gesetzt, um das einbinden via DOM-Scripting einfacher zu gestalten-->
 <body id="body_main">
 
   <header>
+	<!--Der Header ist ein Screenshotausschnitt aus dem PDF mit der Aufgabenstellung-->
     <img src="img/header.png" alt="">
   </header>
+<!--es folgt das linksseitige Menü, welches die Stift- und Farbauswahl sowie den Gruppenein- oder Austritt regelt-->
 
   <section id="left_menue">
-    <h1 class="hidden">Linkes Menü</h1>
+    <h1 class="hidden">Linkes Menü</h1> <!--diese Überschrift ist hidden, damit sie nicht unnötigen Text auf der Seite hervorruft, welcher von der Zielgruppe "Kinder im Grundschulalter"
+                                          unangenehm wahrgenommen werden könnte und die benutzerfreundlichkeit einschränken würde. Sie muss jedoch vorhanden sein, damit der Code den
+                                          Validator fehlerfrei passiert.-->
     <article id="tool_table">
       <h4>Stifte und Gruppe</h4>
       <form id="group-input-form">
@@ -28,10 +33,10 @@
       </form>
       <figure class="hidden">
 
-        <input type="range" min="1" max="40" id="pen2_line_width">
+        <input type="range" min="1" max="40" id="pen2_line_width"><!--durch das max Attribut wird die spätere Stiftgröße schon hier begrenzt. Dieses element wird später durch DOM-Scripting und die classes "hidden" bzw. "visible" ein bzw ausgeblendet. -->
         <figcaption>Breite</figcaption>
       </figure>
-      <table id="toolsAndColors">
+      <table id="toolsAndColors"><!--images stammen von http://www.flaticon.com/ -->
         <tr>
           <td  id="pen0">
             <img src="img/pen.svg" alt="">
@@ -42,19 +47,20 @@
           <td id="pen2">
             <img src="img/pen.svg" alt="">
           </td>
+          <!--diese Tablle wird via DOM-Scripting später noch um eine Farbauswahl erweitert-->
         </tr>
       </table>
     </article>
   </section>
 
-  <section id="right_menue">
-    <h1 class="hidden">Rechtes Menü</h1>
+  <section id="right_menue"> <!--Dieses Menü enthält die Einstellungsmöglichkeit für die Größe des Malfensters sowie die Speichern-,Rückgängig- und Neuoption-->
+    <h1 class="hidden">Rechtes Menü</h1> <!--auch bei diesem Element wird die class "hidden" angewendet um den Text nicht unnötig darzustellen-->
     <article>
       <h4>Einstellungen</h4>
 
       <div id="drawpane_sizechooser">
         <h4>Malfeld Größe:</h4>
-        <select id="size_selector">
+        <select id="size_selector"> <!--ein eventlistener auf dieses Element regelt später die Größenverstellung der Malfläche-->
           <option value="400">Klein</option>
           <option value="600">Mittel</option>
           <option value="800">Groß</option>
@@ -72,7 +78,7 @@
     </article>
   </section>
 
-  <section id="paint_section">
+  <section id="paint_section"> <!--Diese section enthält das eigentliche Malfeld und wird via DOM-Scripting noch um weitere Malflächen erweitert-->
     <h4>Malfläche</h4>
     <article id="sketch">
     <h4 class="hidden">Malfläche</h4>

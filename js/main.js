@@ -1,5 +1,11 @@
 (function() {
 
+  //einige Kommentare sind auf Deutsch und Andere (während der entwicklung enstandene kommentare) sind auf Englisch
+
+  //ein Großes JSON-Objekt wird vorbereitet, um alle notwendigen Daten zu speichern und Später wieder abrufen zu können.
+  //alle daten unter "sendable" können auch via sendInstructions() versendet werden bei den verbleibenden Daten ist dies nur teilweise möglich,
+  //da es hierbei teilweise circuläre Strukturen gibt, welche nicht von JSON.stringify() verarbeitet werden können.
+
   var variablesJson = {
     "drawPane": {
       "sendable": {
@@ -9,16 +15,19 @@
     },
   };
 
+  //ws wird die websocketverbindung darstellen.
   var ws;
 
+  //Diese Funktion bereitet die notwendigen Zeichenfläche vor.
   function initDrawPane() {
+    //eine die die unterste Ebene darstellt
     variablesJson.drawPane["canvas"] = document.querySelector('#paint');
     variablesJson.drawPane["ctx"] = variablesJson.drawPane["canvas"].getContext('2d');
     variablesJson.drawPane["sketch"] = document.querySelector('#sketch');
     variablesJson.drawPane["sketch_style"] = getComputedStyle(variablesJson.drawPane["sketch"]);
     variablesJson.drawPane["canvas"].width = parseInt(variablesJson.drawPane["sketch_style"].getPropertyValue('width'));
     variablesJson.drawPane["canvas"].height = parseInt(variablesJson.drawPane["sketch_style"].getPropertyValue('height'));
-
+    //eine für die Zeichenoperationen, die wir von anderen clients unsere gruppe übertragen ekommen.
     // Creating a canvas for draw recieved
     variablesJson.drawPane["received_tmp_canvas"] = document.createElement('canvas');
     variablesJson.drawPane["received_tmp_ctx"] = variablesJson.drawPane["received_tmp_canvas"].getContext('2d');
@@ -27,6 +36,7 @@
     variablesJson.drawPane["received_tmp_canvas"].height = variablesJson.drawPane["canvas"].height;
     variablesJson.drawPane["sketch"].appendChild(variablesJson.drawPane["received_tmp_canvas"]);
 
+    //eine für alle lokalen zeichenopperationen. eine zeichenopperationen wird auf die erste ebene übertragen sobald eien neue maloperation ausgeführt wird
     // Creating a tmp canvas
     variablesJson.drawPane["tmp_canvas"] = document.createElement('canvas');
     variablesJson.drawPane["tmp_ctx"] = variablesJson.drawPane["tmp_canvas"].getContext('2d');
@@ -37,15 +47,18 @@
 
 
 
-
+    //die Variablen,die die mauspositonen für die malevents halten werden. daher X und Y als bezeichnung für die beiden Achsen.
+    //aktuell
     variablesJson.drawPane.sendable["mouse"] = {
       x: 0,
       y: 0
     };
+    //anfangsposition
     variablesJson.drawPane.sendable["start_mouse"] = {
       x: 0,
       y: 0
     };
+
     variablesJson.drawPane.sendable["sprayIntervalID"] = '';
     variablesJson.drawPane.sendable["choosenColor"] = '';
     variablesJson.drawPane.sendable["offset"] = '';
@@ -56,7 +69,7 @@
     variablesJson.drawPane["ctx"].fillRect(0, 0, variablesJson.drawPane["tmp_canvas"].width, variablesJson.drawPane["tmp_canvas"].height);
 
   }
-
+  //diese funtion wird 2x während der start() function aufgerufen. einmal mit strings für die mausevents und einmal mit strings für touchevents
   function setDrawEventListener(move, down, up) {
     //set event listener
 
@@ -105,6 +118,7 @@
           variablesJson.drawPane["ctx"].drawImage(variablesJson.drawPane["tmp_canvas"], 0, 0);
           // Clearing tmp canvas
           variablesJson.drawPane["tmp_ctx"].clearRect(0, 0, variablesJson.drawPane["tmp_canvas"].width, variablesJson.drawPane["tmp_canvas"].height);
+
           variablesJson.drawPane["tmp_ctx"].strokeStyle = variablesJson.drawPane.sendable["choosenColor"];
           variablesJson.drawPane["tmp_ctx"].lineWidth = 5;
           variablesJson.drawPane["tmp_ctx"].beginPath();
@@ -240,7 +254,10 @@
 
 
   }
-
+  //diese Funktion wird den übergebenen String "x" an den verbundenen websocket Server senden
+  //wenn der String das 200 zeichen Limit überschreitet wird er gesplittet.
+  //die UUID des clients wird jeder nachricht vorangestellt um ein richtiges zusammensetzen der nachrichten
+  //auf seiten des Emofängers zu ermöglichen
   function sendInstructions(x) {
     var stringToSend = x;
     //console.log(variablesJson);
@@ -262,15 +279,14 @@
 
     saveDataToLocalStorage();
   }
-
+  //diese Function speichert die für das erneute laden der einstellungen wichtigen daten in den LocalStorage des webbrowsers
   function saveDataToLocalStorage() {
     localStorage.setItem("Net_Paint_sendable", JSON.stringify(variablesJson.drawPane.sendable));
     localStorage.setItem("Net_Paint_canvas_data", variablesJson.drawPane["canvas"].toDataURL());
   }
-
+  //Constructor für den eigentlichen Farbwähler der in das HTML eingesetzt wird.
   function PrepareColorChooser(counter) {
-
-    var colorArray = returnColorArray(counter);
+    var colorArray = returnColorArray(counter); //counter wird mit übergeben obwohl in dieser version ein statisches array mit farben zurückgeliefert wird.
     //console.log(colorArray);
     var colorCounter = colorArray.length - 1;
     this.trArray = [];
@@ -307,12 +323,16 @@
 
     function returnColorArray(size) {
       var array = ['blue', 'red', 'yellow', 'green', 'lightblue', 'purple', 'orange', 'lightgreen', 'black'];
+
+      //die Forschleife ermöglicht das zufällige laden irgendwelcher farben und stammt aus einem frühen entwicklungsstadium
+      //um das debuggen weniger langweilig zu gestalten
+
       //  for (var i = 0; i < (size * size); i++) {
       //    array[i] = "rgb(" + Math.round(Math.random() * 255) + ", " + Math.round(Math.random() * 255) + ", " + Math.round(Math.random() * 255) + ")";
       //  }
       return array;
     }
-
+    //die remove functionalität muss vorhanden sein, um ein komplettes reset aller daten durchführen zu können
     this.removeFromDom = function() {
       for (var i = 0; i < this.trArray.length; i++) {
         this.trArray[i].remove();
@@ -329,14 +349,17 @@
 
   function start() {
 
-    var colorchoosersize = 3; //3*3
+    var colorchoosersize = 3; //(3*3) wenn diese zahl hier geändert wird, so ändert sich die anzahl an feldern der farbwählers
+    // wenn diese Zahl geändert wird, so muss auch in PrepareColorChooser() das zufällige erstellen
+    //von farebn einschalten ansonsten wird es zu einer exception kommen, da auf ein nicht vorhandenes
+    //element des arays zugegriffen werden würde.
 
-    for (var i = 0; i < 3; i++) {
-    var pens = document.getElementById("toolsAndColors").getElementsByTagName("td");
+    for (var i = 0; i < 3; i++) { //loop duch die Stifte und setzen der notClicked class
+      var pens = document.getElementById("toolsAndColors").getElementsByTagName("td");
       //console.log(pens[i]);
       pens[i].addEventListener("click", function(e) {
         for (var b = 0; b < 3; b++) {
-        var pens = document.getElementById("toolsAndColors").getElementsByTagName("td");
+          var pens = document.getElementById("toolsAndColors").getElementsByTagName("td");
           pens[b].setAttribute("class", "notClicked");
         }
         //console.log(e.toElement.parentNode.tagName);
@@ -358,16 +381,18 @@
     }
 
     for (var b = 0; b < 3; b++) {
-    var pens = document.getElementById("toolsAndColors").getElementsByTagName("td");
+      var pens = document.getElementById("toolsAndColors").getElementsByTagName("td");
       pens[b].setAttribute("class", "notClicked")
     }
 
 
-    initDrawPane();
-    //set defaults for initDrawPane()
+    initDrawPane(); //bereitet das zeichenfeld vor
+
+    //set eventlistener for touch and mous events
     setDrawEventListener('mousemove', 'mousedown', 'mouseup');
     setDrawEventListener('touchmove', 'touchstart', 'touchend');
 
+    //set defaults for initDrawPane()
     /* Drawing on Paint App */
     variablesJson.drawPane["tmp_ctx"].lineJoin = 'round';
     variablesJson.drawPane["tmp_ctx"].lineCap = 'round';
@@ -375,14 +400,15 @@
     variablesJson.drawPane["tmp_ctx"].fillStyle = 'blue'; //blue is default color
     variablesJson.drawPane.sendable["choosenColor"] = 'blue';
 
-    pens[0].setAttribute("class", "clicked");
+    //make pen0 clicked as it is the default pen
+    pens[0].setAttribute("class", "clicked"); //set
     variablesJson.drawPane.sendable["choosenPen"] = 'pen0';
 
     variablesJson.drawPane["colorChooser"] = new PrepareColorChooser(colorchoosersize);
     //console.log(variablesJson.drawPane["colorChooser"]);
     variablesJson.drawPane["colorChooser"].addToHTMLDom();
 
-    for (var element = 3; element < (colorchoosersize * colorchoosersize) + colorchoosersize; element++) {
+    for (var element = 3; element < (colorchoosersize * colorchoosersize) + colorchoosersize; element++) { //prepare colorchooser fields to be notclicked except the blue field as blue is the default color
       var table = document.getElementById("toolsAndColors");
       var tdsInTable = table.getElementsByTagName("td");
       tdsInTable[element].setAttribute("class", "notClicked");
@@ -401,18 +427,14 @@
     //console.log(variablesJson);
     //console.log(variablesJson);
 
+    //prepare eventlistener to call setDrawpaneSize() when someone changes the drawpane size
     document.getElementById("size_selector").addEventListener('change', setDrawpaneSize, false);
-
     setDrawpaneSize();
-
-
 
     //init connection to websocket broadcast server
     setupWebsocketConnection();
 
-
     variablesJson.drawPane["groupConnectButton"] = document.getElementById("groupConnectButton");
-
     setConnectToGroupButton();
 
     //try loading stuff from previos session
@@ -435,10 +457,11 @@
 
 
   }
-
+  //this function will be called when someone changes the drawpane size
   function setDrawpaneSize() {
-    //    variablesJson.drawPane["sketch"].width=document.getElementById("size_selector").value;
-    //    variablesJson.drawPane["sketch"].height=document.getElementById("size_selector").value;
+    //set the drawpane size for all panes
+    //variablesJson.drawPane["sketch"].width=document.getElementById("size_selector").value;
+    //variablesJson.drawPane["sketch"].height=document.getElementById("size_selector").value;
     console.log(variablesJson.drawPane["sketch"]);
     variablesJson.drawPane["sketch"].style.width = document.getElementById("size_selector").value + "px";
     variablesJson.drawPane["sketch"].style.height = document.getElementById("size_selector").value + "px";
@@ -462,13 +485,15 @@
   }
 
   function setupWebsocketConnection() {
+    //connect to websocketsever and prepare onopen() onclose() and onmessage()
     try {
+      //different websocket servers for testing purpose
       //ws = new WebSocket("ws://mediengeil.org:8080");
-      //ws = new WebSocket("ws://localhost:8080");
+      ws = new WebSocket("ws://localhost:8080");
       //ws = new WebSocket("ws://192.168.2.104:8080");
       //ws = new WebSocket("ws://borsti1.inf.fh-flensburg.de:8080");
       //ws = new WebSocket("ws://192.168.178.55:8080");
-      ws = new WebSocket("ws://192.168.43.178:8080");
+      //ws = new WebSocket("ws://192.168.43.178:8080");
 
       ws.onopen = function() {
         //console.log(this.readyState);
@@ -488,6 +513,7 @@
         }
       };
       ws.onmessage = function(e) {
+        //diese funktion wird alle empfangen daten verarbeiten und die (teil)nachrichten nach UUID des senders abspeichern biss sie verwendbar sind.
         //console.log(e.data);
         //console.log(storeSplittedMessage);
         //console.log(messagesByUuid.messages);
@@ -573,9 +599,10 @@
   }
 
 
+  //resetAll() wird aufgerufen, wenn jemand ein neues malfeld mit dem "neu"button anlegt
   function resetAll() {
 
-    //ask to save
+    //ask to save before deleting everything
     var askForSave = confirm("Willst du dein Bild zuerst speichern?");
     console.log(askForSave);
     if (askForSave == true) {
@@ -595,13 +622,17 @@
         "received": {}
       },
     };
+    //delete localStorage as we doesnt need it anymore
     localStorage.clear();
+    //close server connection before initiating a new one while start()
     ws.close();
     start();
 
   }
 
+  //loadfromLocalStorage() wird während start() aufgerufen und soll (falls vorhanden) Daten aus einer vorherigen sitzung aus dem localStorage laden
   function loadfromLocalStorage() {
+
     try {
       if (localStorage.hasOwnProperty("Net_Paint_sendable") && localStorage.hasOwnProperty("Net_Paint_canvas_data")) {
         variablesJson.drawPane.sendable = JSON.parse(localStorage.getItem("Net_Paint_sendable"));
@@ -628,7 +659,7 @@
         }
 
         //set correct choosen pen from previus session
-      var pens = document.getElementById("toolsAndColors").getElementsByTagName("td");
+        var pens = document.getElementById("toolsAndColors").getElementsByTagName("td");
         for (var i = 0; i < pens.length; i++) {
           pens[i].setAttribute("class", "notClicked");
         }
@@ -651,6 +682,8 @@
 
   }
 
+  //downloadCanvasAsImage() wird aufgerufen, wenn jemand den save button drückt oder beim anlegen eines neuen dokuments
+  //das speichern bejat.
   function downloadCanvasAsImage() {
     console.log("download");
     var filename = prompt("Bitte dateinamen eingeben:")
@@ -664,6 +697,9 @@
     }
   }
 
+  //undoLast() wird aufgerufen, wenn jemand den rückgängig button klickt
+  //undoLast() macht die letzte maloperation die local ausgeführt wurde und damit noch auf dem temporären canvas ist
+  //rückgängig indem das tmp-canvas geleert wird ohne dessen inhalt vorher auf das tieferligende canvas zu schreiben
   function undoLast() {
     //send our hole canvas to group members so everywhere our last changes would be overwritten
     console.log("send our hole canvas###############");
@@ -682,25 +718,27 @@
     variablesJson.drawPane["tmp_ctx"].clearRect(0, 0, variablesJson.drawPane["tmp_canvas"].width, variablesJson.drawPane["tmp_canvas"].height);
   }
 
-
+  //clearDrawPane() löscht alle inhalte aller zeichenflächen
   function clearDrawPane() {
     //implement removal of all already drawn stuff here
 
     variablesJson.drawPane["tmp_ctx"].clearRect(0, 0, variablesJson.drawPane["tmp_canvas"].width, variablesJson.drawPane["tmp_canvas"].height);
     variablesJson.drawPane["ctx"].clearRect(0, 0, variablesJson.drawPane["tmp_canvas"].width, variablesJson.drawPane["tmp_canvas"].height);
+    variablesJson.drawPane["received_tmp_ctx"].clearRect(0, 0, variablesJson.drawPane["tmp_canvas"].width, variablesJson.drawPane["tmp_canvas"].height);
   }
 
   function setConnectToGroupButton() {
-
+    //dieser eventlistener muss auf diesem weg gesett werden, damit man ihn später auch wieedr entfernen kann
+    //dies wäre bei eier inline function nicht möglich
     variablesJson.drawPane["groupConnectButton"].addEventListener('click', variablesJson.drawPane["connectFunction"], false);
 
   }
-
+  //definition der entsprechnden function als element des großen JSONS um überall das entvernen des eventlistener möglcih zu machen.
   variablesJson.drawPane["connectFunction"] = function(e) {
     e.preventDefault();
     variablesJson.drawPane.sendable.clientInfo["groupName"] = document.getElementById("groupName").value;
     variablesJson.drawPane.sendable.clientInfo["requestCanvas"] = true;
-    getCanvasFromOtherClients();
+    sendInstructions(JSON.stringify(variablesJson.drawPane.sendable));
     //variablesJson.drawPane.sendable.clientInfo["requestCanvas"]=false; //cant set it to false here because in ws.onmessage case to paint would be wrong
     console.log("Gruppenname: " + variablesJson.drawPane.sendable.clientInfo["groupName"]);
     var groupNameInHtml = document.createElement("P");
@@ -712,12 +750,6 @@
     document.getElementById("connection_button").src = "img/disconnect.png";
     variablesJson.drawPane["groupConnectButton"].removeEventListener('click', variablesJson.drawPane["connectFunction"], false);
     setDisconnectFromGroupButton();
-  }
-
-
-  function getCanvasFromOtherClients() {
-    console.log(JSON.stringify(variablesJson.drawPane.sendable));
-    sendInstructions(JSON.stringify(variablesJson.drawPane.sendable));
   }
 
   function setDisconnectFromGroupButton() {
@@ -733,10 +765,7 @@
     }, false);
   }
 
-  function disconnectFromGroup() {
-
-  }
-
+  //drawReceived() kümmert sich um die empfangen daten und zeichnet diese auf ein eingenes canvas.
   function drawReceived() {
     //console.log(variablesJson.drawPane.received);
 
@@ -814,6 +843,7 @@
 
   }
 
+  //generateUUID() liefert eien uuid zurück um jeden client einzelt identifizieren zu können und eine (fast) undmöglich schon bestehenden gruppe beizutreten
   function generateUUID() {
     var d = new Date().getTime();
     var uuid = 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
