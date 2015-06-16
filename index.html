@@ -21,7 +21,9 @@
       <p>left side menue</p>
       <form id="group-input-form">
         <input type="text" value="Gruppenname" id="groupName">
-        <a id="groupConnectButton"><img id="connection_button" src="img/connect.png" alt=""></a>
+        <a id="groupConnectButton">
+          <img id="connection_button" src="img/connect.png" alt="">
+        </a>
       </form>
       <figure class="hidden">
 
@@ -48,18 +50,20 @@
     <article>
       <p>right menue</p>
 
-
-      <br>
+      <div id="drawpane_sizechooser">
+      <h4>Malfeld Größe:</h4>
+      <select id="size_selector">
+        <option value="smal">Klein</option>
+        <option value="middle">Mittel</option>
+        <option value="huge">Groß</option>
+      </select>
+      </div>
       <a id="undo_button">
         <img class="rightside_buttons" src="img/undo.png" alt="">
       </a>
-
-      <br>
       <a id="reset_button">
         <img class="rightside_buttons" src="img/new.png" alt="">
       </a>
-
-      <br>
       <a id="save_button" download="MeinBild.jpg">
         <img class="rightside_buttons" src="img/save.png" alt="">
       </a>

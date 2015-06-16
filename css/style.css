@@ -5,11 +5,10 @@ header {
   width: 100%;
   margin: 0;
 }
-
-.visible{
+.visible {
   visibility: visible;
 }
-.hidden{
+.hidden {
   visibility: hidden;
 }
 
@@ -41,11 +40,11 @@ header {
   display: block;
   clear: both;
 }
-#groupConnectButton img{
+#groupConnectButton img {
   width: 30%;
-  padding:2px;
-  border:1px solid black;
-  margin-top:1em;
+  padding: 2px;
+  border: 1px solid black;
+  margin-top: 1em;
 }
 
 /*##########################right menue#################*/
@@ -63,11 +62,15 @@ header {
 #undo_button {
   margin-bottom: 2em;
 }
-
-.rightside_buttons{
+.rightside_buttons {
   width: 30%;
-  padding:2px;
-  border:1px solid black;
+  padding: 2px;
+  margin:1em;
+  border: 1px solid black;
+}
+
+#size_selector{
+  margin-bottom:1em;
 }
 
 /*#########################paint_section###################*/
@@ -103,6 +106,12 @@ header {
   top: 0;
   cursor: crosshair;
 }
+#drawpane_sizechooser{
+  border:1px solid black;
+  width:65%;
+  padding:1px;
+}
+
 
 /*##############################footer#####################*/
 
