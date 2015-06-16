@@ -573,7 +573,7 @@
 
           document.getElementById("connection_button").alt = "Von Gruppe trennen";
           document.getElementById("connection_button").src="img/disconnect.png";
-          
+
           variablesJson.drawPane["groupConnectButton"].removeEventListener('click', variablesJson.drawPane["connectFunction"], false);
 
           setDisconnectFromGroupButton();
@@ -679,6 +679,7 @@
       document.getElementById("connection_button").src="img/connect.png";
       variablesJson.drawPane.sendable.clientInfo["groupName"] = generateUUID(); //beacause a uuid is as its name says universal unique no other client will have the same groupname so no draw instructions that will be received will be shown
       variablesJson.drawPane["groupConnectButton"].removeEventListener('click', disconnect, false);
+      saveDataToLocalStorage();
       setConnectToGroupButton();
     }, false);
   }
