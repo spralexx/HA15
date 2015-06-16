@@ -332,11 +332,11 @@
     var colorchoosersize = 3; //3*3
 
     for (var i = 0; i < 3; i++) {
-      var pens = document.getElementsByName("pen");
+    var pens = document.getElementById("toolsAndColors").getElementsByTagName("td");
       //console.log(pens[i]);
       pens[i].addEventListener("click", function(e) {
         for (var b = 0; b < 3; b++) {
-          var pens = document.getElementsByName("pen");
+        var pens = document.getElementById("toolsAndColors").getElementsByTagName("td");
           pens[b].setAttribute("class", "notClicked");
         }
         //console.log(e.toElement.parentNode.tagName);
@@ -358,7 +358,7 @@
     }
 
     for (var b = 0; b < 3; b++) {
-      var pens = document.getElementsByName("pen");
+    var pens = document.getElementById("toolsAndColors").getElementsByTagName("td");
       pens[b].setAttribute("class", "notClicked")
     }
 
@@ -628,7 +628,7 @@
         }
 
         //set correct choosen pen from previus session
-        var pens = document.getElementsByName("pen");
+      var pens = document.getElementById("toolsAndColors").getElementsByTagName("td");
         for (var i = 0; i < pens.length; i++) {
           pens[i].setAttribute("class", "notClicked");
         }

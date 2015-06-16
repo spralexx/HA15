@@ -10,6 +10,7 @@ header {
 }
 .hidden {
   visibility: hidden;
+  display: none;
 }
 
 /*############################left menue################*/
