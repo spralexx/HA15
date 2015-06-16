@@ -331,10 +331,9 @@
           e.toElement.parentNode.setAttribute("class", "clicked");
           variablesJson.drawPane.sendable["choosenPen"] = e.toElement.parentNode.id;
           if (variablesJson.drawPane.sendable["choosenPen"] == "pen2") {
-            document.getElementById("pen2_line_width").parentNode.setAttribute("class","visible");
-          }
-          else{
-            document.getElementById("pen2_line_width").parentNode.setAttribute("class","hidden");
+            document.getElementById("pen2_line_width").parentNode.setAttribute("class", "visible");
+          } else {
+            document.getElementById("pen2_line_width").parentNode.setAttribute("class", "hidden");
           }
           //console.log(choosenPen);
         } else {
@@ -426,7 +425,8 @@
       //ws = new WebSocket("ws://localhost.org:8080");
       //ws = new WebSocket("ws://192.168.2.104:8080");
       //ws = new WebSocket("ws://borsti1.inf.fh-flensburg.de:8080");
-      ws = new WebSocket("ws://192.168.178.55:8080");
+      //ws = new WebSocket("ws://192.168.178.55:8080");
+      ws = new WebSocket("ws://localhost:8080");
 
       ws.onopen = function() {
         //console.log(this.readyState);
@@ -571,7 +571,9 @@
           groupNameInHtml.appendChild(text);
           document.getElementById("group-input-form").appendChild(groupNameInHtml);
 
-          variablesJson.drawPane["groupConnectButton"].value = "Von Gruppe trennen";
+          document.getElementById("connection_button").alt = "Von Gruppe trennen";
+          document.getElementById("connection_button").src="img/disconnect.png";
+          
           variablesJson.drawPane["groupConnectButton"].removeEventListener('click', variablesJson.drawPane["connectFunction"], false);
 
           setDisconnectFromGroupButton();
@@ -654,7 +656,8 @@
     groupNameInHtml.appendChild(text);
     document.getElementById("group-input-form").appendChild(groupNameInHtml);
 
-    variablesJson.drawPane["groupConnectButton"].value = "Von Gruppe trennen";
+    document.getElementById("connection_button").alt = "Von Gruppe trennen";
+    document.getElementById("connection_button").src="img/disconnect.png";
     variablesJson.drawPane["groupConnectButton"].removeEventListener('click', variablesJson.drawPane["connectFunction"], false);
     setDisconnectFromGroupButton();
   }
@@ -672,7 +675,8 @@
     variablesJson.drawPane["groupConnectButton"].addEventListener('click', function disconnect(e) {
       e.preventDefault();
       document.getElementById("group-input-form").removeChild(document.getElementById("group-input-form").lastChild);
-      variablesJson.drawPane["groupConnectButton"].value = "Mit Gruppe verbinden";
+      document.getElementById("connection_button").alt = "Mit Gruppe verbinden";
+      document.getElementById("connection_button").src="img/connect.png";
       variablesJson.drawPane.sendable.clientInfo["groupName"] = generateUUID(); //beacause a uuid is as its name says universal unique no other client will have the same groupname so no draw instructions that will be received will be shown
       variablesJson.drawPane["groupConnectButton"].removeEventListener('click', disconnect, false);
       setConnectToGroupButton();

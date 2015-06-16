@@ -21,12 +21,12 @@
       <p>left side menue</p>
       <form id="group-input-form">
         <input type="text" value="Gruppenname" id="groupName">
-        <input type="submit" value="Mit Gruppe verbinden" id="groupConnectButton">
+        <a id="groupConnectButton"><img id="connection_button" src="img/connect.png" alt=""></a>
       </form>
       <figure class="hidden">
 
-      <input type="range" min="1" max="40" id="pen2_line_width" >
-      <figcaption>Breite</figcaption>
+        <input type="range" min="1" max="40" id="pen2_line_width">
+        <figcaption>Breite</figcaption>
       </figure>
       <table id="toolsAndColors">
         <tr>
@@ -34,7 +34,7 @@
             <img src="img/pen.svg">
           </td>
           <td name="pen" id="pen1">
-            <img src="img/pen.svg">
+            <img src="img/spray.png">
           </td>
           <td name="pen" id="pen2">
             <img src="img/pen.svg">
@@ -50,12 +50,18 @@
 
 
       <br>
-      <input type="button" value="Rückgängig" id="undo_button">
+      <a id="undo_button">
+        <img class="rightside_buttons" src="img/undo.png" alt="">
+      </a>
+
       <br>
-      <input type="button" value="Neu" id="reset_button">
+      <a id="reset_button">
+        <img class="rightside_buttons" src="img/new.png" alt="">
+      </a>
+
       <br>
       <a id="save_button" download="MeinBild.jpg">
-        <input type="button" value="Bild speichern">
+        <img class="rightside_buttons" src="img/save.png" alt="">
       </a>
     </article>
   </section>

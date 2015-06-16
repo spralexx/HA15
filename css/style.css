@@ -41,6 +41,12 @@ header {
   display: block;
   clear: both;
 }
+#groupConnectButton img{
+  width: 30%;
+  padding:2px;
+  border:1px solid black;
+  margin-top:1em;
+}
 
 /*##########################right menue#################*/
 
@@ -56,6 +62,12 @@ header {
 }
 #undo_button {
   margin-bottom: 2em;
+}
+
+.rightside_buttons{
+  width: 30%;
+  padding:2px;
+  border:1px solid black;
 }
 
 /*#########################paint_section###################*/
