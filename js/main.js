@@ -174,6 +174,7 @@
           variablesJson.drawPane["tmp_ctx"].lineTo(variablesJson.drawPane.sendable["mouse"].x, variablesJson.drawPane.sendable["mouse"].y);
           variablesJson.drawPane.sendable["start_mouse"].x = variablesJson.drawPane.sendable["mouse"].x;
           variablesJson.drawPane.sendable["start_mouse"].y = variablesJson.drawPane.sendable["mouse"].y;
+          //console.log(variablesJson.drawPane["tmp_ctx"].lineWidth);
           variablesJson.drawPane["tmp_ctx"].stroke();
           break;
         case "pen1":
@@ -388,6 +389,10 @@
     //console.log(variablesJson);
     //console.log(variablesJson);
 
+    document.getElementById("size_selector").addEventListener('change', setDrawpaneSize, false);
+
+    setDrawpaneSize();
+
 
 
     //init connection to websocket broadcast server
@@ -419,6 +424,27 @@
 
   }
 
+  function setDrawpaneSize() {
+    //    variablesJson.drawPane["sketch"].width=document.getElementById("size_selector").value;
+    //    variablesJson.drawPane["sketch"].height=document.getElementById("size_selector").value;
+    console.log(variablesJson.drawPane["sketch"]);
+    variablesJson.drawPane["sketch"].style.width = document.getElementById("size_selector").value + "px";
+    variablesJson.drawPane["sketch"].style.height = document.getElementById("size_selector").value + "px";
+    variablesJson.drawPane["sketch_style"] = getComputedStyle(variablesJson.drawPane["sketch"]);
+    console.log(variablesJson.drawPane["sketch_style"].getPropertyValue('width'));
+
+    variablesJson.drawPane["canvas"].width = parseInt(variablesJson.drawPane["sketch_style"].getPropertyValue('width'));
+    variablesJson.drawPane["canvas"].height = parseInt(variablesJson.drawPane["sketch_style"].getPropertyValue('height'));
+
+    variablesJson.drawPane["tmp_canvas"].width = variablesJson.drawPane["canvas"].width;
+    variablesJson.drawPane["tmp_canvas"].height = variablesJson.drawPane["canvas"].height;
+    variablesJson.drawPane["tmp_ctx"].lineJoin = 'round';
+    variablesJson.drawPane["tmp_ctx"].lineCap = 'round';
+
+    console.log(variablesJson.drawPane.sendable);
+
+  }
+
   function setupWebsocketConnection() {
     try {
       //ws = new WebSocket("ws://mediengeil.org:8080");
@@ -426,7 +452,7 @@
       //ws = new WebSocket("ws://192.168.2.104:8080");
       //ws = new WebSocket("ws://borsti1.inf.fh-flensburg.de:8080");
       //ws = new WebSocket("ws://192.168.178.55:8080");
-      ws = new WebSocket("ws://localhost:8080");
+      ws = new WebSocket("ws://192.168.43.178:8080");
 
       ws.onopen = function() {
         //console.log(this.readyState);
@@ -585,6 +611,16 @@
           document.getElementById("pen2_line_width").value = variablesJson.drawPane.sendable["pen2LineWidth"];
         }
 
+        //set correct choosen pen from previus session
+        var pens = document.getElementsByName("pen");
+        for (var i = 0; i < pens.length; i++) {
+          pens[i].setAttribute("class", "notClicked");
+        }
+        //console.log(variablesJson.drawPane.sendable["choosenPen"]);
+        document.getElementById(variablesJson.drawPane.sendable["choosenPen"]).setAttribute("class", "clicked");
+        if (variablesJson.drawPane.sendable["choosenPen"] == "pen2") {
+          document.getElementById("pen2_line_width").parentNode.setAttribute("class", "visible");
+        }
 
         var image = new Image();
         image.src = localStorage.getItem("Net_Paint_canvas_data");
@@ -662,9 +698,6 @@
     setDisconnectFromGroupButton();
   }
 
-  function connectToGroup(groupName) {
-
-  }
 
   function getCanvasFromOtherClients() {
     console.log(JSON.stringify(variablesJson.drawPane.sendable));

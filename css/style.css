@@ -65,12 +65,11 @@ header {
 .rightside_buttons {
   width: 30%;
   padding: 2px;
-  margin:1em;
+  margin: 1em;
   border: 1px solid black;
 }
-
-#size_selector{
-  margin-bottom:1em;
+#size_selector {
+  margin-bottom: 1em;
 }
 
 /*#########################paint_section###################*/
@@ -106,12 +105,11 @@ header {
   top: 0;
   cursor: crosshair;
 }
-#drawpane_sizechooser{
-  border:1px solid black;
-  width:65%;
-  padding:1px;
+#drawpane_sizechooser {
+  border: 1px solid black;
+  width: 65%;
+  padding: 1px;
 }
-
 
 /*##############################footer#####################*/
 
