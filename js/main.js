@@ -1,4 +1,5 @@
 (function() {
+  "use strict";
 
   //einige Kommentare sind auf Deutsch und Andere (während der entwicklung enstandene kommentare) sind auf Englisch
 
@@ -348,6 +349,7 @@
   }
 
   function start() {
+    initCustomElement(); //vorbereitung für das custom element treffen
 
     var colorchoosersize = 3; //(3*3) wenn diese zahl hier geändert wird, so ändert sich die anzahl an feldern der farbwählers
     // wenn diese Zahl geändert wird, so muss auch in PrepareColorChooser() das zufällige erstellen
@@ -457,6 +459,33 @@
 
 
   }
+
+  function initCustomElement(){
+    var viewermode=Object.create(HTMLElement.prototype);
+
+    viewermode.attachedCallback = function(){
+      var backgroundimg=document.createElement("img");
+      backgroundimg.setAttribute("src", "img/viewermode.png");
+      backgroundimg.setAttribute("class","rightside_buttons");
+      this.appendChild(backgroundimg);
+
+      this.addEventListener("click",enableViewermode,false);
+    console.log("/home/rene/Downloads/iris.png");
+
+    }
+    var viewermodeOBJRegister = document.registerElement('x-viewermode', {prototype: viewermode});
+
+    function enableViewermode(){
+      //send drawpane to background  via z-index so it painting atempts will not take effect
+      if(confirm("Willst du Wirklich den Zuschauermodus aktivieren? Dies kann nicht rückgängig gemacht werden.")){
+
+      variablesJson.drawPane["tmp_canvas"].setAttribute("style","z-index: -1;");
+      }
+
+    }
+
+  }
+
   //this function will be called when someone changes the drawpane size
   function setDrawpaneSize() {
     //set the drawpane size for all panes
