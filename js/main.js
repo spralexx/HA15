@@ -194,7 +194,7 @@
     }, false);
 
     variablesJson.drawPane["onPaint"] = function() {
-      sendInstructions(JSON.stringify(variablesJson.drawPane.sendable));
+      sendInstructions(btoa(JSON.stringify(variablesJson.drawPane.sendable)));
 
       switch (variablesJson.drawPane.sendable["choosenPen"]) {
         case "pen0":
@@ -460,26 +460,28 @@
 
   }
 
-  function initCustomElement(){
-    var viewermode=Object.create(HTMLElement.prototype);
+  function initCustomElement() {
+    var viewermode = Object.create(HTMLElement.prototype);
 
-    viewermode.attachedCallback = function(){
-      var backgroundimg=document.createElement("img");
+    viewermode.attachedCallback = function() {
+      var backgroundimg = document.createElement("img");
       backgroundimg.setAttribute("src", "img/viewermode.png");
-      backgroundimg.setAttribute("class","rightside_buttons");
+      backgroundimg.setAttribute("class", "rightside_buttons");
       this.appendChild(backgroundimg);
 
-      this.addEventListener("click",enableViewermode,false);
-    console.log("/home/rene/Downloads/iris.png");
+      this.addEventListener("click", enableViewermode, false);
+      console.log("/home/rene/Downloads/iris.png");
 
     }
-    var viewermodeOBJRegister = document.registerElement('x-viewermode', {prototype: viewermode});
+    var viewermodeOBJRegister = document.registerElement('x-viewermode', {
+      prototype: viewermode
+    });
 
-    function enableViewermode(){
+    function enableViewermode() {
       //send drawpane to background  via z-index so it painting atempts will not take effect
-      if(confirm("Willst du Wirklich den Zuschauermodus aktivieren? Dies kann nicht rückgängig gemacht werden.")){
+      if (confirm("Willst du Wirklich den Zuschauermodus aktivieren? Dies kann nicht rückgängig gemacht werden.")) {
 
-      variablesJson.drawPane["tmp_canvas"].setAttribute("style","z-index: -1;");
+        variablesJson.drawPane["tmp_canvas"].setAttribute("style", "z-index: -1;");
       }
 
     }
@@ -534,8 +536,8 @@
       };
 
       var senderUuid = '';
-      var storeSplittedMessage = '';
-      var firstCanvasSenderUuid = '';
+      //var storeSplittedMessage = '';
+      //var firstCanvasSenderUuid = '';
       var messagesByUuid = {
         "messages": {
 
@@ -546,16 +548,20 @@
         //console.log(e.data);
         //console.log(storeSplittedMessage);
         //console.log(messagesByUuid.messages);
+        var data = '';
         if (e.data.substring(0, 3) == "+++") {
           //    console.log(e.data);
         } else {
           try {
             senderUuid = e.data.substring(0, 36);
+            var encodedData = e.data.substring(36, e.data.length);
+            data = atob(encodedData);
+            console.log(data);
             if (messagesByUuid.messages.hasOwnProperty(senderUuid)) {
-              messagesByUuid.messages[senderUuid] = messagesByUuid.messages[senderUuid] + e.data.substring(36, e.data.length);
-              //console.log(JSON.parse(messagesByUuid.messages[senderUuid]));
+              messagesByUuid.messages[senderUuid] = messagesByUuid.messages[senderUuid] + data;
+              console.log(JSON.parse(messagesByUuid.messages[senderUuid]));
               var receivedJSON = JSON.parse(messagesByUuid.messages[senderUuid]);
-              console.log(receivedJSON.clientInfo);
+              //console.log(receivedJSON.clientInfo);
               //  console.log(variablesJson.drawPane.sendable.clientInfo["groupName"]);
               //messagesByUuid.messages[senderUuid] = '';
               if (receivedJSON.clientInfo["groupName"] == variablesJson.drawPane.sendable.clientInfo["groupName"]) {
@@ -568,7 +574,7 @@
                   //console.log(variablesJson.drawPane["canvas"].toDataURL());
                   variablesJson.drawPane.sendable["canvasDataUrl"] = variablesJson.drawPane["canvas"].toDataURL();
                   variablesJson.drawPane.sendable.clientInfo["requestCanvas"] = false; //set to false so other clients wont send their hole canvas back to us. (loop prevention)
-                  sendInstructions(JSON.stringify(variablesJson.drawPane.sendable));
+                  sendInstructions(btoa(JSON.stringify(variablesJson.drawPane.sendable)));
                   variablesJson.drawPane.sendable["canvasDataUrl"] = ''; //delete canvas data url from sendable so we only send it once
                   //  console.log("achtuuuuuuung: ");
                   //  console.log(variablesJson.drawPane.sendable);
@@ -610,11 +616,11 @@
               }
 
             } else {
-              messagesByUuid.messages[senderUuid] = e.data.substring(36, e.data.length);
+              messagesByUuid.messages[senderUuid] = data;
             }
 
           } catch (err) {
-            storeSplittedMessage = storeSplittedMessage + e.data.substring(36, e.data.length);
+            //storeSplittedMessage = storeSplittedMessage + data.substring(36, data.length);
             //console.log(storeSplittedMessage);
             console.log("ERROR!!: " + err.message); //this error will mostlikely show "unexpected end of input" beacause of that 200 charecters limit on serverside
           }
@@ -736,7 +742,7 @@
     variablesJson.drawPane.sendable["canvasDataUrl"] = variablesJson.drawPane["canvas"].toDataURL();
     variablesJson.drawPane.sendable.clientInfo["requestCanvas"] = false; //set to false so other clients wont send their hole canvas back to us. (loop prevention)
     variablesJson.drawPane.sendable["undoLast"] = true;
-    sendInstructions(JSON.stringify(variablesJson.drawPane.sendable));
+    sendInstructions(btoa(JSON.stringify(variablesJson.drawPane.sendable)));
     variablesJson.drawPane.sendable["canvasDataUrl"] = ''; //delete canvas data url from sendable so we only send it once
     variablesJson.drawPane.sendable["undoLast"] = false;
     //  console.log("achtuuuuuuung: ");
@@ -767,7 +773,7 @@
     e.preventDefault();
     variablesJson.drawPane.sendable.clientInfo["groupName"] = document.getElementById("groupName").value;
     variablesJson.drawPane.sendable.clientInfo["requestCanvas"] = true;
-    sendInstructions(JSON.stringify(variablesJson.drawPane.sendable));
+    sendInstructions(btoa(JSON.stringify(variablesJson.drawPane.sendable)));
     //variablesJson.drawPane.sendable.clientInfo["requestCanvas"]=false; //cant set it to false here because in ws.onmessage case to paint would be wrong
     console.log("Gruppenname: " + variablesJson.drawPane.sendable.clientInfo["groupName"]);
     var groupNameInHtml = document.createElement("P");
