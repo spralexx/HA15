@@ -349,7 +349,12 @@
   }
 
   function start() {
+    try{
+
     initCustomElement(); //vorbereitung für das custom element treffen
+  }catch(e){
+  console.log(e);
+}
 
     var colorchoosersize = 3; //(3*3) wenn diese zahl hier geändert wird, so ändert sich die anzahl an feldern der farbwählers
     // wenn diese Zahl geändert wird, so muss auch in PrepareColorChooser() das zufällige erstellen
@@ -519,8 +524,8 @@
     //connect to websocketsever and prepare onopen() onclose() and onmessage()
     try {
       //different websocket servers for testing purpose
-      //ws = new WebSocket("ws://mediengeil.org:8080");
-      ws = new WebSocket("ws://localhost:8080");
+      ws = new WebSocket("ws://mediengeil.org:8080");
+      //ws = new WebSocket("ws://localhost:8080");
       //ws = new WebSocket("ws://192.168.2.104:8080");
       //ws = new WebSocket("ws://borsti1.inf.fh-flensburg.de:8080");
       //ws = new WebSocket("ws://192.168.178.55:8080");
